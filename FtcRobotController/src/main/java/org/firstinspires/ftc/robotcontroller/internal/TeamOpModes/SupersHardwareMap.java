@@ -78,7 +78,8 @@ public class SupersHardwareMap {
     //Runs the flicker a specified number of rotations at the default flicker speed times the specified power coefficient(negative to go backwards)
     public void moveFlicker(double rotations, double powerCoefficient){
         //May have to change based on gear reduction, multiply by 1/2 for 20 and 3/2 for 60, 40 is standard
-        int encoderInput = (int) java.lang.Math.floor(rotations * 1120) ;
+        //1440 is one rotation for tetrix, 1120 is one rotation for AndyMark
+        int encoderInput = (int) java.lang.Math.floor(rotations * 1440) ;
 
         //Sets target position for encoder
         flicker.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
