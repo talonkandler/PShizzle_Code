@@ -30,7 +30,7 @@ CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR
 TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-package org.firstinspires.ftc.robotcontroller.internal.testcode;
+package org.firstinspires.ftc.robotcontroller.internal.SampleOpModes;
 
 import com.qualcomm.hardware.adafruit.BNO055IMU;
 import com.qualcomm.hardware.adafruit.JustLoggingAccelerationIntegrator;
@@ -280,9 +280,7 @@ public class TestTelemetry extends LinearOpMode
                 updateGyro();
 
                 //Waiting for program to be started before starting
-                try{
                     waitForStart();
-                } catch(InterruptedException exc) {};
             }
 
             //Updates the gyro sensor and formats the angle so that it is easier to use

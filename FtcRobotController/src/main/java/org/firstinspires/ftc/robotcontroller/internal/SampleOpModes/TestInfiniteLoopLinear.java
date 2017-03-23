@@ -30,7 +30,7 @@ CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR
 TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-package org.firstinspires.ftc.robotcontroller.internal.testcode;
+package org.firstinspires.ftc.robotcontroller.internal.SampleOpModes;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -49,13 +49,9 @@ public class TestInfiniteLoopLinear extends LinearOpMode {
 
         // Do nothing, forever
         for (int count = 0; ; count++) {
-            try {
                 telemetry.addData("count", count);
                 updateTelemetry(telemetry);
-                idle();
-            } catch (InterruptedException e) {
                 // ignore: we're trying to do an infinite loop!
             }
         }
     }
-}
