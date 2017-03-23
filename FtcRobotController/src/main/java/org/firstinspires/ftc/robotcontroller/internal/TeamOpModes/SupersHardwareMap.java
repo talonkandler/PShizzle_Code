@@ -170,9 +170,7 @@ public class SupersHardwareMap {
         //May have to reverse flicker or intake
 
         //If this is called in an autonomous program, it waits for the program to start before proceeding
-        try{
         if(autonomous)
             program.waitForStart();
-        } catch(java.lang.InterruptedException exc) {}
     }
 }
