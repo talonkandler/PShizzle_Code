@@ -43,35 +43,25 @@ public class SupersHardwareMap {
         program = op;                       //Allows access to user program
     }
 
-    //Moves the drive wheels
-    //Too complicated?????? if so, turn into driveright and driveleft
-    public void drive(double leftspeed, double rightspeed){
-        if(leftspeed != 0 || rightspeed != 0) {
+    //Moves the left drive wheels
+    public void ldrive(double leftspeed){
             if (blue) {                           //Moves the drive wheels normally if blue side
-                if (leftspeed != 0) {
-                    fleft.setPower(leftspeed);
-                    bleft.setPower(leftspeed);
-                }
-                if (rightspeed != 0) {
-                    fright.setPower(rightspeed);
-                    bright.setPower(rightspeed);
-                }
+                fleft.setPower(leftspeed);
+                bleft.setPower(leftspeed);
             } else {                              //Moves the drive wheels in the opposite direction and switches motors to drive backwards
-                if (leftspeed != 0) {
-                    fright.setPower(-leftspeed);
-                    bright.setPower(-leftspeed);
-                }
-                if (rightspeed != 0) {
-                    fleft.setPower(-rightspeed);
-                    bleft.setPower(-rightspeed);
-                }
+                fright.setPower(-leftspeed);
+                bright.setPower(-leftspeed);
             }
-        }
-        else {
-            fleft.setPower(0);
-            bleft.setPower(0);
-            fright.setPower(0);
-            bright.setPower(0);
+    }
+
+    //Moves the right drive wheels
+    public void rdrive(double rightspeed){
+        if (blue) {                           //Moves the drive wheels normally if blue side
+            fright.setPower(rightspeed);
+            bright.setPower(rightspeed);
+        } else {                              //Moves the drive wheels in the opposite direction and switches motors to drive backwards
+            fleft.setPower(-rightspeed);
+            bleft.setPower(-rightspeed);
         }
     }
 
@@ -109,7 +99,8 @@ public class SupersHardwareMap {
         fleft.setTargetPosition(encoderInput);
 
         //Sets motor power
-        drive(powerCoefficient * AUTONOMOUS_DRIVE_SPEED, powerCoefficient * AUTONOMOUS_DRIVE_SPEED);
+        ldrive(powerCoefficient * AUTONOMOUS_DRIVE_SPEED);
+        rdrive(powerCoefficient * AUTONOMOUS_DRIVE_SPEED);
 
         fright.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         fleft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -119,29 +110,26 @@ public class SupersHardwareMap {
         while(Math.abs(fright.getCurrentPosition()) < Math.abs(fright.getTargetPosition()) || (fleft.getCurrentPosition()) < Math.abs(fleft.getTargetPosition()) && timer.seconds() < 5 && program.opModeIsActive()) {
             if(Math.abs(fright.getCurrentPosition()) >= Math.abs(fright.getTargetPosition())) {
                 if(blue) {
-                    fright.setPower(0);
-                    bright.setPower(0);
+                    rdrive(0);
                 }
                 else {
-                    fleft.setPower(0);
-                    bleft.setPower(0);
+                    ldrive(0);
                 }
 
             }
             if(Math.abs(fleft.getCurrentPosition()) >= Math.abs(fleft.getTargetPosition())) {
                 if(blue) {
-                    fleft.setPower(0);
-                    bleft.setPower(0);
+                    ldrive(0);
                 }
                 else {
-                    fright.setPower(0);
-                    bright.setPower(0);
+                    rdrive(0);
                 }
             }
         }
 
         //Stops wheels and sets motors back to their regular mode
-        drive(0,0);
+        ldrive(0);
+        rdrive(0);
         fleft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         fright.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }

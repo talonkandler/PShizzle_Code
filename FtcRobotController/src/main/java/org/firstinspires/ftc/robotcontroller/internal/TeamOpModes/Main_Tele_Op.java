@@ -35,20 +35,16 @@ public class Main_Tele_Op extends OpMode {
     //Drives right drive motors based on right joystick and left drive motors based on left joystick
     public void runWheels() {
             //Threshold ensures that the motors wont move when joystick is released even if the joysticks don't reset exactly to 0
-            if (Math.abs(gamepad1.left_stick_y) > threshold) {
-                robot.drive(-gamepad1.left_stick_y * driveSpeed, 0);
-            } else {
-                robot.fleft.setPower(0);
-                robot.bleft.setPower(0);
-            }
+            if (Math.abs(gamepad1.left_stick_y) > threshold)
+                robot.ldrive(-gamepad1.left_stick_y * driveSpeed);
+            else
+                robot.ldrive(0);
 
-            if (Math.abs(gamepad1.right_stick_y) > threshold) {
-                robot.drive(0, -gamepad1.right_stick_y * driveSpeed);
 
-            } else {
-                robot.fright.setPower(0);
-                robot.bright.setPower(0);
-            }
+            if (Math.abs(gamepad1.right_stick_y) > threshold)
+                robot.rdrive(-gamepad1.right_stick_y * driveSpeed);
+            else
+                robot.rdrive(0);
     }
 
     //Changes the front of the robot for driving purposes when dpad up or down is pressed
