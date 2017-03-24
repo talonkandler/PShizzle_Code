@@ -4,46 +4,50 @@ import com.qualcomm.hardware.adafruit.BNO055IMU;
 import com.qualcomm.hardware.adafruit.JustLoggingAccelerationIntegrator;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorController;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.OpticalDistanceSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 
 public class SupersHardwareMap {
     //Setting up empty hardware map to be replaced later on
     HardwareMap hwMap;
+                                                                                                        //HOW TO CONFIGURE THE PHONES:
+    //Declaring motor variables                                                                 format: "config name" = M(otor)#, C(ontroller)#
+    public DcMotor fleft; //Front left drive motor                                                      "fleft" = M1, C1 with encoder
+    public DcMotor fright; //Front right drive motor                                                    "fright" = M2, C1 with encoder
+    public DcMotor bleft; //Back left drive motor                                                       "bleft" = M1, C2
+    public DcMotor bright; //Back right drive motor                                                     "bright" = M2, C2
+    public DcMotor flicker; //Flicker motor                                                             "flicker" = M1, C3 with encoder
+    public DcMotor intake; //Intake motor                                                               "intake" = M2, C3
 
-    //Declaring motor variables                         Format: config name = M(otor)#, C(ontroller)#
-    public DcMotor fleft; //Front left drive motor              fleft = M1, C1 with encoder
-    public DcMotor fright; //Front right drive motor            fright = M2, C1 with encoder
-    public DcMotor bleft; //Back left drive motor               bleft = M1, C2
-    public DcMotor bright; //Back right drive motor             bright = M2, C2
-    public DcMotor flicker; //Flicker motor                     flicker = M1, C3 with encoder
-    public DcMotor intake; //Intake motor                       intake = M2, C3
-    public BNO055IMU imu; //Gyro sensor
-    public OpticalDistanceSensor ods; //Optical distance sensor
-    public ColorSensor color; //Color sensor
+    //Declaring sensor variables                                                                format: "config name" = (category), P(ort)#
+    public BNO055IMU imu; //Gyro sensor                                                                 "imu" =
+    public OpticalDistanceSensor ods; //Optical distance sensor for stopping in front of the beacon     "ods" =
+    public ColorSensor color; //Color sensor for detecting beacon color                                 "color" =
 
     //Declaring public constants(change to user preference/measurements)
-    public static final double WHEEL_DIAMETER = 5;//? inches
+    public static final double WHEEL_DIAMETER = 5;//Unit: inches, measure as current number probably isn't accurate
     public static final double AUTONOMOUS_DRIVE_SPEED = 0.5f;
     public static final double TELEOP_DRIVE_SPEED = 1f;
     public static final double INTAKE_SPEED = -1f;
     public static final double FLICKER_SPEED = 0.8f;
 
-    //Setting up variables used in program
-    public ElapsedTime timer = new ElapsedTime();
-    public boolean blue;
-    public boolean autonomous;
-    LinearOpMode program;
-
+    //Setting up variables used in program, made some public so that they are accessible by other programs
+    //Some such as "program" don't need to be accessed by other programs, so they are kept local
     public float heading;
     public float lastHeading;
     float rawGyro;
     float gyroAdd = 0;
+    public ElapsedTime timer = new ElapsedTime();
+    public boolean blue;
+    public boolean autonomous;
+    LinearOpMode program;
 
     //Teleop constructor
     public SupersHardwareMap(boolean blu, boolean auto) {
@@ -51,7 +55,7 @@ public class SupersHardwareMap {
         autonomous = auto;                  //Says whether program is autonomous or teleop
     }
 
-    //Autonomous
+    //Autonomous constructor
     public SupersHardwareMap(boolean blu, boolean auto, LinearOpMode op) {
         blue = blu;                         //Determines whether the program is blue side or red side, set to blue side for teleop, or red side to go backwards
         autonomous = auto;                  //Says whether program is autonomous or teleop
@@ -63,13 +67,15 @@ public class SupersHardwareMap {
         // Save reference to Hardware map
         hwMap = ahwMap;
 
-        //Assigning values to the previously declared motor, beacon, and sensor variables
-        fleft = hwMap.dcMotor.get("fright");    //Name motors/servos/sensors in phone configuration based on the variable name
+        //Setting up the hardwaremap for the motor variables
+        fleft = hwMap.dcMotor.get("fright");
         fright = hwMap.dcMotor.get("fleft");
         bleft = hwMap.dcMotor.get("bright");
         bright = hwMap.dcMotor.get("bleft");
         flicker = hwMap.dcMotor.get("flicker");
         intake = hwMap.dcMotor.get("intake");
+
+        //Only sets up sensors in autonomous, otherwise they are not needed
         if(autonomous) {
             imu = hwMap.get(BNO055IMU.class, "imu");
             ods = hwMap.opticalDistanceSensor.get("ods");
@@ -80,6 +86,12 @@ public class SupersHardwareMap {
         fright.setDirection(DcMotor.Direction.REVERSE);
         bright.setDirection(DcMotor.Direction.REVERSE);
         //May have to reverse flicker or intake
+
+        //Sets motors to the mode that runs them at a constant power (not enough drive motor encoders to make them run at a constant speed, but that would be preferable for autonomous)
+        fleft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        fright.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        bleft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        bright.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         if(autonomous) {
             //Setting up data for gyro sensors
@@ -97,29 +109,29 @@ public class SupersHardwareMap {
         }
     }
 
-    //Moves the left drive wheels
+    //Moves or brakes the left drive wheels
     public void ldrive(double leftspeed) {
             if (blue) {                           //Moves the drive wheels normally if blue side
                 fleft.setPower(leftspeed);
                 bleft.setPower(leftspeed);
-            } else {                              //Moves the drive wheels in the opposite direction and switches motors to drive backwards
+            } else {                              //Moves the drive wheels in the opposite direction and switches motors to drive backwards if on red side(or going backward in teleop)
                 fright.setPower(-leftspeed);
                 bright.setPower(-leftspeed);
             }
     }
 
-    //Moves the right drive wheels
+    //Moves or brakes the right drive wheels
     public void rdrive(double rightspeed) {
         if (blue) {                           //Moves the drive wheels normally if blue side
             fright.setPower(rightspeed);
             bright.setPower(rightspeed);
-        } else {                              //Moves the drive wheels in the opposite direction and switches motors to drive backwards
+        } else {                              //Moves the drive wheels in the opposite direction and switches motors to drive backwards if on red side(or going backward in teleop)
             fleft.setPower(-rightspeed);
             bleft.setPower(-rightspeed);
         }
     }
 
-    //Waits a certain amount of time
+    //Waits a certain amount of time, useful for waiting without having to manually reset the timer and all that every time
     public void delay(double seconds) {
         timer.reset();
         while (timer.seconds() < seconds);
@@ -127,69 +139,83 @@ public class SupersHardwareMap {
 
     //Runs the flicker a specified number of rotations at the default flicker speed times the specified power coefficient(negative to go backwards)
     public void moveFlicker(double rotations, double powerCoefficient) {
-        //May have to change based on gear reduction, multiply by 1/2 for 20 and 3/2 for 60, 40 is standard
-        //1440 is one rotation for tetrix, 1120 is one rotation for AndyMark
-        int encoderInput = (int) java.lang.Math.floor(rotations * 1440) ;
+        //Sets the flicker to use the encoder
+        flicker.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
         //Sets target position for encoder
-        flicker.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        flicker.setTargetPosition(encoderInput);
-        flicker.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        //May have to change based on gear reduction, multiply by 1/2 for 20 and 3/2 for 60, 40 is standard
+        //1440 is one rotation for tetrix, 1120 is one rotation for AndyMark
+        flicker.setTargetPosition((int) java.lang.Math.floor(rotations * 1440) + flicker.getCurrentPosition());
 
-        //Runs motor until the encoder value is reached
+        //Sets the power
         flicker.setPower(powerCoefficient * FLICKER_SPEED);
-        timer.reset();
+
+        //Runs the flicker until the target position is reached
         if(autonomous)
-            while(Math.abs(flicker.getCurrentPosition()) < Math.abs(flicker.getTargetPosition()) && timer.seconds() < 5 && program.opModeIsActive()){}
+            while(Math.abs(flicker.getTargetPosition() - flicker.getCurrentPosition()) > 10 && program.opModeIsActive()) {
+                program.telemetry.addData("Flicker target:", flicker.getTargetPosition());
+                program.telemetry.addData("Flicker current:", flicker.getCurrentPosition());
+                program.telemetry.update();
+            }
         else
-            while(Math.abs(flicker.getCurrentPosition()) < Math.abs(flicker.getTargetPosition()) && timer.seconds() < 5){}
+            while(Math.abs(flicker.getTargetPosition() - flicker.getCurrentPosition()) > 10){}
+
+        //Stops the flicker after the target position is reached
         flicker.setPower(0);
     }
 
+    //TEST OUT ENCODER VALUES TO SEE WHAT NEEDS TO BE REVERSED
     //Drives the robot a specified number of inches at the default autonomous speed times the specified power coefficient(negative to go backwards)
     //Only use in autonomous
     public void driveInches(double inches, double powerCoefficient) {
-        //Figures out what value to give the encoder based on the amount of inches to be covered
-        int encoderInput = (int) java.lang.Math.floor((inches / (WHEEL_DIAMETER * 3.1416)) * 1120); //Change 1120 based on motor type
-
-        //Resets encoders and sets the power and position to be used
-        fright.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        fleft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        fright.setTargetPosition(encoderInput);
-        fleft.setTargetPosition(encoderInput);
-
-        //Sets motor power
-        ldrive(powerCoefficient * AUTONOMOUS_DRIVE_SPEED);
-        rdrive(powerCoefficient * AUTONOMOUS_DRIVE_SPEED);
-
-        fright.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        fleft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        timer.reset();
-
-        //If this is too laggy, it may work better to cut out the second encoder
-        while(Math.abs(fright.getCurrentPosition()) < Math.abs(fright.getTargetPosition()) || (fleft.getCurrentPosition()) < Math.abs(fleft.getTargetPosition()) && timer.seconds() < 5 && program.opModeIsActive()) {
-            if(Math.abs(fright.getCurrentPosition()) >= Math.abs(fright.getTargetPosition())) {
-                if(blue) {
-                    rdrive(0);
-                }
-                else {
-                    ldrive(0);
-                }
-
-            }
-            if(Math.abs(fleft.getCurrentPosition()) >= Math.abs(fleft.getTargetPosition())) {
-                if(blue) {
-                    ldrive(0);
-                }
-                else {
-                    rdrive(0);
-                }
-            }
+        //Reverses the amount of inches to go (effectively reversing the encoder values) and speed if the robot is on red mode(backwards)
+        if(!blue) {
+            inches = - inches;
+            powerCoefficient = - powerCoefficient;
         }
 
-        //Stops wheels and sets motors back to their regular mode
-        ldrive(0);
-        rdrive(0);
+        //Sets mode to run to position so that the encoders are used
+        fleft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        fright.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        //Sets the target position based on the amount of inches to be covered and the starting position
+        fleft.setTargetPosition((int) java.lang.Math.floor((inches / (WHEEL_DIAMETER * 3.1416)) * 1120) + fleft.getCurrentPosition()); //Change 1120 based on motor type
+        //Right motors are reversed, so negative encoder values should hopefully compensate for that
+        fright.setTargetPosition((int) java.lang.Math.floor((- inches / (WHEEL_DIAMETER * 3.1416)) * 1120) + fright.getCurrentPosition()); //Change 1120 based on motor type
+
+        //Sets motor power based on the default autonomous speed and the power coefficient parameter
+        fleft.setPower(powerCoefficient * AUTONOMOUS_DRIVE_SPEED);
+        fright.setPower(powerCoefficient * AUTONOMOUS_DRIVE_SPEED);
+        bleft.setPower(powerCoefficient * AUTONOMOUS_DRIVE_SPEED);
+        bright.setPower(powerCoefficient * AUTONOMOUS_DRIVE_SPEED);
+
+        //If this is too laggy, it may work better to use just one encoder
+        //Keeps moving the wheels until they are within 10 encoder ticks of the target value
+        while(Math.abs(fleft.getTargetPosition() - fleft.getCurrentPosition()) > 10  || Math.abs(fright.getTargetPosition() - fright.getCurrentPosition()) > 10 && program.opModeIsActive()) {
+            //Turns off right or left wheels individually if they reach the target position first
+            if(Math.abs(fleft.getTargetPosition() - fleft.getCurrentPosition()) <= 10 && fleft.getPower() != 0) {
+                fleft.setPower(0);
+                bleft.setPower(0);
+            }
+            if(Math.abs(fright.getTargetPosition() - fright.getCurrentPosition()) <= 10 && fright.getPower() != 0) {
+                fright.setPower(0);
+                bright.setPower(0);
+            }
+
+            //Sends telemetry for debugging
+            program.telemetry.addData("fleft target", fleft.getTargetPosition());
+            program.telemetry.addData("fleft current", fleft.getCurrentPosition());
+            program.telemetry.addData("fright target", fright.getTargetPosition());
+            program.telemetry.addData("fright current", fright.getCurrentPosition());
+            program.telemetry.update();
+        }
+
+        //Stops wheels after target position has been reached and sets motors back to their regular mode that doesn't use encoders
+        fleft.setPower(0);
+        fright.setPower(0);
+        bleft.setPower(0);
+        bright.setPower(0);
+
         fleft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         fright.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
