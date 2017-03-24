@@ -1,9 +1,15 @@
 package org.firstinspires.ftc.robotcontroller.internal.TeamOpModes;
 
+import com.qualcomm.hardware.adafruit.BNO055IMU;
+import com.qualcomm.hardware.adafruit.JustLoggingAccelerationIntegrator;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.OpticalDistanceSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
+
+import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 
 public class SupersHardwareMap {
     //Setting up empty hardware map to be replaced later on
@@ -16,6 +22,8 @@ public class SupersHardwareMap {
     public DcMotor bright; //Back right drive motor             bright = M2, C2
     public DcMotor flicker; //Flicker motor                     flicker = M1, C3 with encoder
     public DcMotor intake; //Intake motor                       intake = M2, C3
+    /*public BNO055IMU imu; //Gyro Sensor
+    public OpticalDistanceSensor ODS; //Optical distance sensor*/
 
     //Declaring public constants(change to user preference/measurements)
     public static final double WHEEL_DIAMETER = 5;//? inches
@@ -29,6 +37,11 @@ public class SupersHardwareMap {
     public boolean blue;
     public boolean autonomous;
     LinearOpMode program;
+
+    /*public float heading;
+    public float lastHeading;
+    float rawGyro;
+    float gyroAdd = 0;*/
 
     //Teleop constructor
     public SupersHardwareMap(boolean blu, boolean auto){
@@ -134,6 +147,23 @@ public class SupersHardwareMap {
         fright.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
 
+    //Updates the gyro sensor and formats the angle so that it is easier to use
+   /* public void updateGyro(){
+        //Gets the raw value of the gyro sensor
+        rawGyro = -imu.getAngularOrientation().toAxesReference(AxesReference.INTRINSIC).toAxesOrder(AxesOrder.ZYX).firstAngle;
+
+        //Detects if the gyro sensor goes from 0-360 or 360-0 and adjusts gyroAdd to compensate
+        if (lastHeading < 60 && rawGyro > 300) {
+            gyroAdd = gyroAdd + 360;
+        } else if (lastHeading > 300 && rawGyro < 60) {
+            gyroAdd = gyroAdd - 360;
+        }
+
+        //Puts formatted angle in heading variable and sets the current value as last value for the next cycle
+        heading = gyroAdd - rawGyro;
+        lastHeading = rawGyro;
+    }*/
+
     //Waits a certain amount of time
     public void delay(double seconds) {
         timer.reset();
@@ -152,11 +182,23 @@ public class SupersHardwareMap {
         bright = hwMap.dcMotor.get("bleft");
         flicker = hwMap.dcMotor.get("flicker");
         intake = hwMap.dcMotor.get("intake");
+        //imu = hwMap.get(BNO055IMU.class, "imu");
 
         //Reversing right motors so that all wheels go the same way
         fleft.setDirection(DcMotor.Direction.REVERSE);
         bleft.setDirection(DcMotor.Direction.REVERSE);
         //May have to reverse flicker or intake
+
+        /*//Setting up data for gyro sensors
+        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
+        parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
+        parameters.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
+        parameters.calibrationDataFile = "AdafruitIMUCalibration.json"; // see the calibration sample opmode
+        parameters.loggingEnabled = true;
+        parameters.loggingTag = "IMU";
+        parameters.accelerationIntegrationAlgorithm = new JustLoggingAccelerationIntegrator();
+        imu.initialize(parameters);
+        updateGyro();*/
 
         //If this is called in an autonomous program, it waits for the program to start before proceeding
         if(autonomous)
