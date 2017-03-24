@@ -2,6 +2,7 @@ package org.firstinspires.ftc.robotcontroller.internal.TeamOpModes;
 
 import com.qualcomm.hardware.adafruit.BNO055IMU;
 import com.qualcomm.hardware.adafruit.JustLoggingAccelerationIntegrator;
+import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -22,8 +23,9 @@ public class SupersHardwareMap {
     public DcMotor bright; //Back right drive motor             bright = M2, C2
     public DcMotor flicker; //Flicker motor                     flicker = M1, C3 with encoder
     public DcMotor intake; //Intake motor                       intake = M2, C3
-    /*public BNO055IMU imu; //Gyro Sensor
-    public OpticalDistanceSensor ODS; //Optical distance sensor*/
+    public BNO055IMU imu; //Gyro sensor
+    public OpticalDistanceSensor ods; //Optical distance sensor
+    public ColorSensor color; //Color sensor
 
     //Declaring public constants(change to user preference/measurements)
     public static final double WHEEL_DIAMETER = 5;//? inches
@@ -38,26 +40,65 @@ public class SupersHardwareMap {
     public boolean autonomous;
     LinearOpMode program;
 
-    /*public float heading;
+    public float heading;
     public float lastHeading;
     float rawGyro;
-    float gyroAdd = 0;*/
+    float gyroAdd = 0;
 
     //Teleop constructor
-    public SupersHardwareMap(boolean blu, boolean auto){
+    public SupersHardwareMap(boolean blu, boolean auto) {
         blue = blu;                         //Determines whether the program is blue side or red side, set to blue side for teleop, or red side to go backwards
         autonomous = auto;                  //Says whether program is autonomous or teleop
     }
 
     //Autonomous
-    public SupersHardwareMap(boolean blu, boolean auto, LinearOpMode op){
+    public SupersHardwareMap(boolean blu, boolean auto, LinearOpMode op) {
         blue = blu;                         //Determines whether the program is blue side or red side, set to blue side for teleop, or red side to go backwards
         autonomous = auto;                  //Says whether program is autonomous or teleop
         program = op;                       //Allows access to user program
     }
 
+    //Sets up hardware map, reverses motors, etc.
+    public void init(HardwareMap ahwMap) {
+        // Save reference to Hardware map
+        hwMap = ahwMap;
+
+        //Assigning values to the previously declared motor, beacon, and sensor variables
+        fleft = hwMap.dcMotor.get("fright");    //Name motors/servos/sensors in phone configuration based on the variable name
+        fright = hwMap.dcMotor.get("fleft");
+        bleft = hwMap.dcMotor.get("bright");
+        bright = hwMap.dcMotor.get("bleft");
+        flicker = hwMap.dcMotor.get("flicker");
+        intake = hwMap.dcMotor.get("intake");
+        if(autonomous) {
+            imu = hwMap.get(BNO055IMU.class, "imu");
+            ods = hwMap.opticalDistanceSensor.get("ods");
+            color = hwMap.colorSensor.get("color");
+        }
+
+        //Reversing right motors so that all wheels go the same way
+        fleft.setDirection(DcMotor.Direction.REVERSE);
+        bleft.setDirection(DcMotor.Direction.REVERSE);
+        //May have to reverse flicker or intake
+
+        if(autonomous) {
+            //Setting up data for gyro sensors
+            BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
+            parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
+            parameters.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
+            parameters.calibrationDataFile = "AdafruitIMUCalibration.json"; // see the calibration sample opmode
+            parameters.loggingEnabled = true;
+            parameters.loggingTag = "IMU";
+            parameters.accelerationIntegrationAlgorithm = new JustLoggingAccelerationIntegrator();
+            imu.initialize(parameters);
+            updateGyro();
+            //Waits for the program to start
+            program.waitForStart();
+        }
+    }
+
     //Moves the left drive wheels
-    public void ldrive(double leftspeed){
+    public void ldrive(double leftspeed) {
             if (blue) {                           //Moves the drive wheels normally if blue side
                 fleft.setPower(leftspeed);
                 bleft.setPower(leftspeed);
@@ -68,7 +109,7 @@ public class SupersHardwareMap {
     }
 
     //Moves the right drive wheels
-    public void rdrive(double rightspeed){
+    public void rdrive(double rightspeed) {
         if (blue) {                           //Moves the drive wheels normally if blue side
             fright.setPower(rightspeed);
             bright.setPower(rightspeed);
@@ -78,8 +119,14 @@ public class SupersHardwareMap {
         }
     }
 
+    //Waits a certain amount of time
+    public void delay(double seconds) {
+        timer.reset();
+        while (timer.seconds() < seconds);
+    }
+
     //Runs the flicker a specified number of rotations at the default flicker speed times the specified power coefficient(negative to go backwards)
-    public void moveFlicker(double rotations, double powerCoefficient){
+    public void moveFlicker(double rotations, double powerCoefficient) {
         //May have to change based on gear reduction, multiply by 1/2 for 20 and 3/2 for 60, 40 is standard
         //1440 is one rotation for tetrix, 1120 is one rotation for AndyMark
         int encoderInput = (int) java.lang.Math.floor(rotations * 1440) ;
@@ -101,7 +148,7 @@ public class SupersHardwareMap {
 
     //Drives the robot a specified number of inches at the default autonomous speed times the specified power coefficient(negative to go backwards)
     //Only use in autonomous
-    public void driveInches(double inches, double powerCoefficient){
+    public void driveInches(double inches, double powerCoefficient) {
         //Figures out what value to give the encoder based on the amount of inches to be covered
         int encoderInput = (int) java.lang.Math.floor((inches / (WHEEL_DIAMETER * 3.1416)) * 1120); //Change 1120 based on motor type
 
@@ -148,7 +195,8 @@ public class SupersHardwareMap {
     }
 
     //Updates the gyro sensor and formats the angle so that it is easier to use
-   /* public void updateGyro(){
+    //Only use in autonomous
+    public void updateGyro() {
         //Gets the raw value of the gyro sensor
         rawGyro = -imu.getAngularOrientation().toAxesReference(AxesReference.INTRINSIC).toAxesOrder(AxesOrder.ZYX).firstAngle;
 
@@ -162,46 +210,30 @@ public class SupersHardwareMap {
         //Puts formatted angle in heading variable and sets the current value as last value for the next cycle
         heading = gyroAdd - rawGyro;
         lastHeading = rawGyro;
-    }*/
-
-    //Waits a certain amount of time
-    public void delay(double seconds) {
-        timer.reset();
-        while (timer.seconds() < seconds);
     }
-    
-    //Sets up hardware map, reverses motors, etc.
-    public void init(HardwareMap ahwMap) {
-        // Save reference to Hardware map
-        hwMap = ahwMap;
 
-        //Assigning values to the previously declared motor, beacon, and sensor variables
-        fleft = hwMap.dcMotor.get("fright");    //Name motors/servos/sensors in phone configuration based on the variable name
-        fright = hwMap.dcMotor.get("fleft");
-        bleft = hwMap.dcMotor.get("bright");
-        bright = hwMap.dcMotor.get("bleft");
-        flicker = hwMap.dcMotor.get("flicker");
-        intake = hwMap.dcMotor.get("intake");
-        //imu = hwMap.get(BNO055IMU.class, "imu");
+    //Turns the robot a specified number of degrees, clockwise = negative angle
+    //Only use in autonomous
+    public void gyroTurn(float degrees) {
+        //Sets the current robot.heading as the initial heading for reference when turning
+        float gyroHeadingInitial = heading;
+        //Turns the correct direction until the angle has been reached
+        if (degrees <= 0) {
+            while (heading > degrees + gyroHeadingInitial && program.opModeIsActive()) {
+                ldrive(AUTONOMOUS_DRIVE_SPEED);
+                rdrive(-AUTONOMOUS_DRIVE_SPEED);
+                updateGyro();
+            }
+        } else {
+            while (heading < degrees + gyroHeadingInitial && program.opModeIsActive()) {
+                ldrive(-AUTONOMOUS_DRIVE_SPEED);
+                rdrive(AUTONOMOUS_DRIVE_SPEED);
+                updateGyro();
+            }
+        }
 
-        //Reversing right motors so that all wheels go the same way
-        fleft.setDirection(DcMotor.Direction.REVERSE);
-        bleft.setDirection(DcMotor.Direction.REVERSE);
-        //May have to reverse flicker or intake
-
-        /*//Setting up data for gyro sensors
-        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
-        parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
-        parameters.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
-        parameters.calibrationDataFile = "AdafruitIMUCalibration.json"; // see the calibration sample opmode
-        parameters.loggingEnabled = true;
-        parameters.loggingTag = "IMU";
-        parameters.accelerationIntegrationAlgorithm = new JustLoggingAccelerationIntegrator();
-        imu.initialize(parameters);
-        updateGyro();*/
-
-        //If this is called in an autonomous program, it waits for the program to start before proceeding
-        if(autonomous)
-            program.waitForStart();
+        //Stops wheels
+        ldrive(0);
+        rdrive(0);
     }
 }

@@ -240,7 +240,7 @@ public class State_Full_Blue_Autonomous extends LinearOpMode {
         robot.flicker.setPower(0);
     }
 
-    //Positions the next ball in the robot.flicker
+    //Positions the next ball in the flicker
     public void positionNextBall(){
         //Runs the robot.intake motor which should correctly position the ball
         timer.reset();
@@ -257,7 +257,7 @@ public class State_Full_Blue_Autonomous extends LinearOpMode {
         while (timer.seconds() < 1 && opModeIsActive()){}
     }
 
-    //Shoots the ball with the robot.flicker
+    //Shoots the ball with the flicker
     public void shoot(){
         //Moves the particle to the shooting location if the intake doesn't correctly deliver it
         moveflicker(1120, .8f);
