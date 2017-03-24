@@ -77,8 +77,8 @@ public class SupersHardwareMap {
         }
 
         //Reversing right motors so that all wheels go the same way
-        fleft.setDirection(DcMotor.Direction.REVERSE);
-        bleft.setDirection(DcMotor.Direction.REVERSE);
+        fright.setDirection(DcMotor.Direction.REVERSE);
+        bright.setDirection(DcMotor.Direction.REVERSE);
         //May have to reverse flicker or intake
 
         if(autonomous) {

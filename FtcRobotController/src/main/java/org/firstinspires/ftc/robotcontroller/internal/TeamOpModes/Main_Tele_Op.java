@@ -61,16 +61,18 @@ public class Main_Tele_Op extends OpMode {
     public void flickers(){
         if(gamepad2.left_trigger > 0.8)
             robot.flicker.setPower(-robot.FLICKER_SPEED * 0.5);
-        if(gamepad2.right_trigger > 0.8)
+        else if(gamepad2.right_trigger > 0.8)
             robot.flicker.setPower(robot.FLICKER_SPEED * 0.5);
-        if(gamepad2.a)
+        else if(gamepad2.a)
             robot.moveFlicker(1, 1);
+        else
+            robot.flicker.setPower(0);
     }
 
     //When joystick is pushed up, the intake motor pushes balls out, when it is pushed down, the intake motor pulls balls in
     public void runIntake() {
         if(Math.abs(gamepad2.left_stick_y) > threshold)
-            robot.intake.setPower(-gamepad2.left_stick_y * SupersHardwareMap.INTAKE_SPEED);
+            robot.intake.setPower(-gamepad2.left_stick_y * robot.INTAKE_SPEED);
         else
             robot.intake.setPower(0);
     }
