@@ -27,9 +27,9 @@ public class SupersHardwareMap {
     public DcMotor intake; //Intake motor                                                               "intake" = M2, C3
 
     //Declaring sensor variables                                                                format: "config name" = (category), P(ort)#
-    public BNO055IMU imu; //Gyro sensor                                                                 "imu" =
-    public OpticalDistanceSensor ods; //Optical distance sensor for stopping in front of the beacon     "ods" =
-    public ColorSensor color; //Color sensor for detecting beacon color                                 "color" =
+    public BNO055IMU imu; //Gyro sensor                                                                 "imu" = I2C (Adafruit IMU), 0
+    public OpticalDistanceSensor ods; //Optical distance sensor for stopping in front of the beacon     "color" = I2C (Color Sensor), 1
+    public ColorSensor color; //Color sensor for detecting beacon color                                 "ods" = Analog Input (Optical Distance Sensor), 0
 
     //Declaring public constants(change to user preference/measurements)
     public static final double WHEEL_DIAMETER = 5;//Unit: inches, measure as current number probably isn't accurate
