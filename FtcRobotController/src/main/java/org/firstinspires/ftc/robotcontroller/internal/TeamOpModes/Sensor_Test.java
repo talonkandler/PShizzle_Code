@@ -15,5 +15,4 @@ public class Sensor_Test extends OpMode {
         telemetry.addData("ODS Reading:", robot.ods.getLightDetected());
         telemetry.addData("Gyro heading:", robot.heading);
     }
-
 }

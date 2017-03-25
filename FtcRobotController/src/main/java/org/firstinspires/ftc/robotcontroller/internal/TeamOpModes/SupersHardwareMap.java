@@ -37,6 +37,7 @@ public class SupersHardwareMap {
     public static final double TELEOP_DRIVE_SPEED = 1f;
     public static final double INTAKE_SPEED = -1f;
     public static final double FLICKER_SPEED = 0.8f;
+    public static final int BEACON_DISTANCE = 1000;
 
     //Setting up variables used in program, made some public so that they are accessible by other programs
     //Some such as "program" don't need to be accessed by other programs, so they are kept local
@@ -259,6 +260,26 @@ public class SupersHardwareMap {
         }
 
         //Stops wheels
+        ldrive(0);
+        rdrive(0);
+    }
+
+    //Drives up and hits the beacon
+    public void hitBeacon(boolean colorisblue) {
+        //Drives until close enough, and gets slower as it goes
+        while(ods.getLightDetected() < BEACON_DISTANCE && program.opModeIsActive()) {
+            ldrive((AUTONOMOUS_DRIVE_SPEED + 0.1) -  AUTONOMOUS_DRIVE_SPEED * (ods.getLightDetected() / BEACON_DISTANCE));
+            rdrive((AUTONOMOUS_DRIVE_SPEED + 0.1) -  AUTONOMOUS_DRIVE_SPEED * (ods.getLightDetected() / BEACON_DISTANCE));
+        }
+
+        //Turns depending on color
+        if((colorisblue && color.blue() > color.red()) || (!colorisblue&& color.blue() < color.red()))
+            rdrive(AUTONOMOUS_DRIVE_SPEED);
+        else
+            ldrive(AUTONOMOUS_DRIVE_SPEED);
+        delay(.25);
+
+        //Brakes
         ldrive(0);
         rdrive(0);
     }
