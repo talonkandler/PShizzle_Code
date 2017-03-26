@@ -29,19 +29,19 @@ public class SupersHardwareMap {
     //Declaring sensor variables                                                                format: "config name" = (category), P(ort)#
     public BNO055IMU imu; //Gyro sensor                                                                 "imu" = I2C (Adafruit IMU), 0
     public OpticalDistanceSensor ods; //Optical distance sensor for stopping in front of the beacon     "color" = I2C (Color Sensor), 1
-   // public OpticalDistanceSensor ods2; //Optical distance sensor for finding line                       not yet implemented
+    public OpticalDistanceSensor ods2; //Optical distance sensor for finding line                       "ods2" = Analog Input (Optical Distance Sensor), 1
     public ColorSensor color; //Color sensor for detecting beacon color                                 "ods" = Analog Input (Optical Distance Sensor), 0
 
     //Declaring public constants(change to user preference/measurements)
-    public static final double WHEEL_DIAMETER = 5;//Unit: inches, measure as current number probably isn't accurate
-    public static final double AUTONOMOUS_DRIVE_SPEED = 0.5f;
+    public static final double WHEEL_DIAMETER = 4 + 7/8;//Unit: inches, measure as current number probably isn't accurate
+    public static final double AUTONOMOUS_DRIVE_SPEED = 0.15f;
     public static final double TELEOP_DRIVE_SPEED = 1f;
     public static final double INTAKE_SPEED = -1f;
     public static final double FLICKER_SPEED = 0.8f;
-    public static final int BEACON_DISTANCE = 1000;
-    public static final int FLOOR_REFLECTIVITY = 300;
-    public static final int LINE_REFLECTIVITY = 700;
-    public static final int MIDDLE_REFLECTIVITY = 450;
+    public static final double BEACON_DISTANCE = 0.2;
+    public static final double FLOOR_REFLECTIVITY = 300;
+    public static final double LINE_REFLECTIVITY = 700;
+    public static final double MIDDLE_REFLECTIVITY = 450;
 
     //Setting up variables used in program, made some public so that they are accessible by other programs
     //Some such as "program" don't need to be accessed by other programs, so they are kept local
@@ -85,7 +85,7 @@ public class SupersHardwareMap {
         if(autonomous) {
             imu = hwMap.get(BNO055IMU.class, "imu");
             ods = hwMap.opticalDistanceSensor.get("ods");
-           // ods2 = hwMap.opticalDistanceSensor.get("ods2");
+            ods2 = hwMap.opticalDistanceSensor.get("ods2");
             color = hwMap.colorSensor.get("color");
             color.enableLed(false);
         }
@@ -176,21 +176,21 @@ public class SupersHardwareMap {
     //TEST OUT ENCODER VALUES TO SEE WHAT NEEDS TO BE REVERSED
     //Drives the robot a specified number of inches at the default autonomous speed times the specified power coefficient(negative to go backwards)
     //Only use in autonomous
-    public void driveInches(double inches, double powerCoefficient) {
+    public void driveInches(int inches, double powerCoefficient) {
         //Reverses the amount of inches to go (effectively reversing the encoder values) and speed if the robot is on red mode(backwards)
         if(!notreversed) {
-            inches = - inches;
             powerCoefficient = - powerCoefficient;
+            inches = - inches;
         }
 
         //Sets mode to run to position so that the encoders are used
-        fleft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        fright.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        /*fleft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        fright.setMode(DcMotor.RunMode.RUN_TO_POSITION);*/
 
         //Sets the target position based on the amount of inches to be covered and the starting position
         fleft.setTargetPosition((int) java.lang.Math.floor((inches / (WHEEL_DIAMETER * 3.1416)) * 1120) + fleft.getCurrentPosition()); //Change 1120 based on motor type
         //Right motors are reversed, so negative encoder values should hopefully compensate for that
-        fright.setTargetPosition((int) java.lang.Math.floor((- inches / (WHEEL_DIAMETER * 3.1416)) * 1120) + fright.getCurrentPosition()); //Change 1120 based on motor type
+        //fright.setTargetPosition((int) - java.lang.Math.floor((inches / (WHEEL_DIAMETER * 3.1416)) * 1120) + fright.getCurrentPosition()); //Change 1120 based on motor type
 
         //Sets motor power based on the default autonomous speed and the power coefficient parameter
         fleft.setPower(powerCoefficient * AUTONOMOUS_DRIVE_SPEED);
@@ -200,17 +200,17 @@ public class SupersHardwareMap {
 
         //If this is too laggy, it may work better to use just one encoder
         //Keeps moving the wheels until they are within 10 encoder ticks of the target value
-        while(Math.abs(fleft.getTargetPosition() - fleft.getCurrentPosition()) > 10  || Math.abs(fright.getTargetPosition() - fright.getCurrentPosition()) > 10 && program.opModeIsActive()) {
-            //Turns off right or left wheels individually if they reach the target position first
-            if(Math.abs(fleft.getTargetPosition() - fleft.getCurrentPosition()) <= 10 && fleft.getPower() != 0) {
+        while(Math.abs(fleft.getTargetPosition() - fleft.getCurrentPosition()) > 20 /* || Math.abs(fright.getTargetPosition() - fright.getCurrentPosition()) > 20*/ && program.opModeIsActive()) {
+           /* //Turns off right or left wheels individually if they reach the target position first
+            if(Math.abs(fleft.getTargetPosition() - fleft.getCurrentPosition()) <= 20 && fleft.getPower() != 0) {
                 fleft.setPower(0);
                 bleft.setPower(0);
             }
-            if(Math.abs(fright.getTargetPosition() - fright.getCurrentPosition()) <= 10 && fright.getPower() != 0) {
+            if(Math.abs(fright.getTargetPosition() - fright.getCurrentPosition()) <= 20 && fright.getPower() != 0) {
                 fright.setPower(0);
                 bright.setPower(0);
             }
-
+            */
             //Sends telemetry for debugging
             program.telemetry.addData("fleft target", fleft.getTargetPosition());
             program.telemetry.addData("fleft current", fleft.getCurrentPosition());
@@ -225,8 +225,8 @@ public class SupersHardwareMap {
         bleft.setPower(0);
         bright.setPower(0);
 
-        fleft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        fright.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        /*fleft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        fright.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);*/
     }
 
     //Updates the gyro sensor and formats the angle so that it is easier to use
@@ -256,14 +256,14 @@ public class SupersHardwareMap {
         //Turns the correct direction until the angle has been reached
         if (degrees <= 0) {
             while (heading > degrees + gyroHeadingInitial && program.opModeIsActive()) {
-                ldrive(AUTONOMOUS_DRIVE_SPEED);
-                rdrive(-AUTONOMOUS_DRIVE_SPEED);
+                ldrive(.1 + AUTONOMOUS_DRIVE_SPEED * (1 - (heading - gyroHeadingInitial) / degrees));
+                rdrive(-.1 - AUTONOMOUS_DRIVE_SPEED * (1 - (heading - gyroHeadingInitial) / degrees));
                 updateGyro();
             }
         } else {
             while (heading < degrees + gyroHeadingInitial && program.opModeIsActive()) {
-                ldrive(-AUTONOMOUS_DRIVE_SPEED);
-                rdrive(AUTONOMOUS_DRIVE_SPEED);
+                rdrive(.1 + AUTONOMOUS_DRIVE_SPEED * (1 - (heading - gyroHeadingInitial) / degrees));
+                ldrive(-.1 - AUTONOMOUS_DRIVE_SPEED * (1 - (heading - gyroHeadingInitial) / degrees));
                 updateGyro();
             }
         }
@@ -276,7 +276,7 @@ public class SupersHardwareMap {
     //Drives up to the line in front of the beacon, follows it, then hits the beacon
     //For the time being, only use in autonomous
     public void hitBeacon(boolean colorisblue) {
-        /*//Drives until line is found
+        //Drives until line is found
         while(ods2.getLightDetected() < LINE_REFLECTIVITY * 0.9 && program.opModeIsActive()) {
             ldrive(AUTONOMOUS_DRIVE_SPEED);
             rdrive(AUTONOMOUS_DRIVE_SPEED);
@@ -284,7 +284,7 @@ public class SupersHardwareMap {
 
         //Brakes
         ldrive(0);
-        rdrive(0);*/
+        rdrive(0);
 
         /*//Line Following(sensor on right side of line on blue side)
         //Backs up to be on the correct side of the line if on blue side
@@ -324,28 +324,33 @@ public class SupersHardwareMap {
 
         //Drives until close enough, and gets slower as it goes(replace with line following, go straight for testing
         while(ods.getLightDetected() < BEACON_DISTANCE && program.opModeIsActive()) {
-            ldrive((AUTONOMOUS_DRIVE_SPEED + 0.1) -  AUTONOMOUS_DRIVE_SPEED * (ods.getLightDetected() / BEACON_DISTANCE));
-            rdrive((AUTONOMOUS_DRIVE_SPEED + 0.1) -  AUTONOMOUS_DRIVE_SPEED * (ods.getLightDetected() / BEACON_DISTANCE));
+            ldrive((AUTONOMOUS_DRIVE_SPEED * .33 + 0.05) -  AUTONOMOUS_DRIVE_SPEED * .33 * (ods.getLightDetected() / BEACON_DISTANCE));
+            rdrive((AUTONOMOUS_DRIVE_SPEED * .33 + 0.05) -  AUTONOMOUS_DRIVE_SPEED * .33 * (ods.getLightDetected() / BEACON_DISTANCE));
         }
+
+        ldrive(0);
+        rdrive(0);
 
         //Takes current position for later use
         updateGyro();
         double preTurnHeading = heading;
 
-        //Turns depending on color
-        if((colorisblue && color.blue() > color.red()) || (!colorisblue&& color.blue() < color.red()))
-            rdrive(AUTONOMOUS_DRIVE_SPEED);
-        else
-            ldrive(AUTONOMOUS_DRIVE_SPEED);
-        delay(.25);
+        delay(.5);
 
-        //Brakes
+        //Turns depending on color
+        if((colorisblue && color.blue() > color.red()) || (!colorisblue && color.blue() < color.red())) {
+            rdrive(2 * AUTONOMOUS_DRIVE_SPEED);
+            ldrive(-1 * AUTONOMOUS_DRIVE_SPEED);
+        }
+        else {
+            ldrive(2 * AUTONOMOUS_DRIVE_SPEED);
+            rdrive(-1 * AUTONOMOUS_DRIVE_SPEED);
+        }
+        delay(0.5);
+
         ldrive(0);
         rdrive(0);
 
-        //Turns back so that the robot isn't misaligned
-        updateGyro();
-        gyroTurn(preTurnHeading - heading);
-        //Add in double check here(maybe use a do-while loop)
+        driveInches(-5, -1);
     }
 }

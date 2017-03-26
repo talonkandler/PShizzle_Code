@@ -26,7 +26,7 @@ public class Main_Tele_Op extends OpMode {
     @Override
     public void loop() {
         runWheels();
-        reverse();
+        reverseAndSpeed();
         flickers();
         runIntake();
         Telemetry();
@@ -49,13 +49,15 @@ public class Main_Tele_Op extends OpMode {
     }
 
     //Changes the front of the robot for driving purposes when dpad up or down is pressed
-    public void reverse(){
+    public void reverseAndSpeed(){
         //Makes the controller drive the robot with the intake as the front if the dpad is pressed up
         if(gamepad1.dpad_up)
             robot.notreversed = true;
         //Makes the controller drive the robot with the intake as the back if the dpad is pressed down
         else if(gamepad1.dpad_down)
             robot.notreversed = false;
+        //Slows down the drive speed when the left trigger is pressed
+        driveSpeed = robot.TELEOP_DRIVE_SPEED - 0.8 * Math.abs(gamepad1.left_trigger);
     }
 
     //Rotates flicker backwards when left trigger is held, shoots when right trigger is held (move to second gamepad for drive practice)
