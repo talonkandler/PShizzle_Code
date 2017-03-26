@@ -29,7 +29,7 @@ public class SupersHardwareMap {
     //Declaring sensor variables                                                                format: "config name" = (category), P(ort)#
     public BNO055IMU imu; //Gyro sensor                                                                 "imu" = I2C (Adafruit IMU), 0
     public OpticalDistanceSensor ods; //Optical distance sensor for stopping in front of the beacon     "color" = I2C (Color Sensor), 1
-    public OpticalDistanceSensor ods2; //Optical distance sensor for finding line                       not yet implemented
+   // public OpticalDistanceSensor ods2; //Optical distance sensor for finding line                       not yet implemented
     public ColorSensor color; //Color sensor for detecting beacon color                                 "ods" = Analog Input (Optical Distance Sensor), 0
 
     //Declaring public constants(change to user preference/measurements)
@@ -85,8 +85,9 @@ public class SupersHardwareMap {
         if(autonomous) {
             imu = hwMap.get(BNO055IMU.class, "imu");
             ods = hwMap.opticalDistanceSensor.get("ods");
-            ods2 = hwMap.opticalDistanceSensor.get("ods2");
+           // ods2 = hwMap.opticalDistanceSensor.get("ods2");
             color = hwMap.colorSensor.get("color");
+            color.enableLed(false);
         }
 
         //Reversing right motors so that all wheels go the same way
@@ -275,7 +276,7 @@ public class SupersHardwareMap {
     //Drives up to the line in front of the beacon, follows it, then hits the beacon
     //For the time being, only use in autonomous
     public void hitBeacon(boolean colorisblue) {
-        //Drives until line is found
+        /*//Drives until line is found
         while(ods2.getLightDetected() < LINE_REFLECTIVITY * 0.9 && program.opModeIsActive()) {
             ldrive(AUTONOMOUS_DRIVE_SPEED);
             rdrive(AUTONOMOUS_DRIVE_SPEED);
@@ -283,7 +284,7 @@ public class SupersHardwareMap {
 
         //Brakes
         ldrive(0);
-        rdrive(0);
+        rdrive(0);*/
 
         /*//Line Following(sensor on right side of line on blue side)
         //Backs up to be on the correct side of the line if on blue side
