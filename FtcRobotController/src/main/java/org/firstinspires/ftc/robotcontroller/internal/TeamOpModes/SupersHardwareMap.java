@@ -29,6 +29,7 @@ public class SupersHardwareMap {
     //Declaring sensor variables                                                                format: "config name" = (category), P(ort)#
     public BNO055IMU imu; //Gyro sensor                                                                 "imu" = I2C (Adafruit IMU), 0
     public OpticalDistanceSensor ods; //Optical distance sensor for stopping in front of the beacon     "color" = I2C (Color Sensor), 1
+    public OpticalDistanceSensor ods2; //Optical distance sensor for finding line                       not yet implemented
     public ColorSensor color; //Color sensor for detecting beacon color                                 "ods" = Analog Input (Optical Distance Sensor), 0
 
     //Declaring public constants(change to user preference/measurements)
@@ -38,27 +39,31 @@ public class SupersHardwareMap {
     public static final double INTAKE_SPEED = -1f;
     public static final double FLICKER_SPEED = 0.8f;
     public static final int BEACON_DISTANCE = 1000;
+    public static final int FLOOR_REFLECTIVITY = 300;
+    public static final int LINE_REFLECTIVITY = 700;
+    public static final int MIDDLE_REFLECTIVITY = 450;
 
     //Setting up variables used in program, made some public so that they are accessible by other programs
     //Some such as "program" don't need to be accessed by other programs, so they are kept local
     public float heading;
     public float lastHeading;
+    public float startingAngle;
     float rawGyro;
     float gyroAdd = 0;
     public ElapsedTime timer = new ElapsedTime();
-    public boolean blue;
+    public boolean notreversed;
     public boolean autonomous;
     LinearOpMode program;
 
     //Teleop constructor
-    public SupersHardwareMap(boolean blu, boolean auto) {
-        blue = blu;                         //Determines whether the program is blue side or red side, set to blue side for teleop, or red side to go backwards
+    public SupersHardwareMap(boolean norev, boolean auto) {
+        notreversed = norev;                 //Determines whether the program is notreversed side or red side, set to notreversed side for teleop, or red side to go backwards
         autonomous = auto;                  //Says whether program is autonomous or teleop
     }
 
     //Autonomous constructor
-    public SupersHardwareMap(boolean blu, boolean auto, LinearOpMode op) {
-        blue = blu;                         //Determines whether the program is blue side or red side, set to blue side for teleop, or red side to go backwards
+    public SupersHardwareMap(boolean norev, boolean auto, LinearOpMode op) {
+        notreversed = norev;                 //Determines whether the program is notreversed side or red side, set to notreversed side for teleop, or red side to go backwards
         autonomous = auto;                  //Says whether program is autonomous or teleop
         program = op;                       //Allows access to user program
     }
@@ -80,6 +85,7 @@ public class SupersHardwareMap {
         if(autonomous) {
             imu = hwMap.get(BNO055IMU.class, "imu");
             ods = hwMap.opticalDistanceSensor.get("ods");
+            ods2 = hwMap.opticalDistanceSensor.get("ods2");
             color = hwMap.colorSensor.get("color");
         }
 
@@ -105,6 +111,7 @@ public class SupersHardwareMap {
             parameters.accelerationIntegrationAlgorithm = new JustLoggingAccelerationIntegrator();
             imu.initialize(parameters);
             updateGyro();
+            startingAngle = heading;
             //Waits for the program to start
             program.waitForStart();
         }
@@ -112,7 +119,7 @@ public class SupersHardwareMap {
 
     //Moves or brakes the left drive wheels
     public void ldrive(double leftspeed) {
-            if (blue) {                           //Moves the drive wheels normally if blue side
+            if (notreversed) {                           //Moves the drive wheels normally if notreversed side
                 fleft.setPower(leftspeed);
                 bleft.setPower(leftspeed);
             } else {                              //Moves the drive wheels in the opposite direction and switches motors to drive backwards if on red side(or going backward in teleop)
@@ -123,7 +130,7 @@ public class SupersHardwareMap {
 
     //Moves or brakes the right drive wheels
     public void rdrive(double rightspeed) {
-        if (blue) {                           //Moves the drive wheels normally if blue side
+        if (notreversed) {                           //Moves the drive wheels normally if notreversed side
             fright.setPower(rightspeed);
             bright.setPower(rightspeed);
         } else {                              //Moves the drive wheels in the opposite direction and switches motors to drive backwards if on red side(or going backward in teleop)
@@ -170,7 +177,7 @@ public class SupersHardwareMap {
     //Only use in autonomous
     public void driveInches(double inches, double powerCoefficient) {
         //Reverses the amount of inches to go (effectively reversing the encoder values) and speed if the robot is on red mode(backwards)
-        if(!blue) {
+        if(!notreversed) {
             inches = - inches;
             powerCoefficient = - powerCoefficient;
         }
@@ -241,7 +248,8 @@ public class SupersHardwareMap {
 
     //Turns the robot a specified number of degrees, clockwise = negative angle
     //Only use in autonomous
-    public void gyroTurn(float degrees) {
+    public void gyroTurn(double degrees) {
+        updateGyro();
         //Sets the current robot.heading as the initial heading for reference when turning
         float gyroHeadingInitial = heading;
         //Turns the correct direction until the angle has been reached
@@ -264,13 +272,64 @@ public class SupersHardwareMap {
         rdrive(0);
     }
 
-    //Drives up and hits the beacon
+    //Drives up to the line in front of the beacon, follows it, then hits the beacon
+    //For the time being, only use in autonomous
     public void hitBeacon(boolean colorisblue) {
-        //Drives until close enough, and gets slower as it goes
+        //Drives until line is found
+        while(ods2.getLightDetected() < LINE_REFLECTIVITY * 0.9 && program.opModeIsActive()) {
+            ldrive(AUTONOMOUS_DRIVE_SPEED);
+            rdrive(AUTONOMOUS_DRIVE_SPEED);
+        }
+
+        //Brakes
+        ldrive(0);
+        rdrive(0);
+
+        /*//Line Following(sensor on right side of line on blue side)
+        //Backs up to be on the correct side of the line if on blue side
+        if(colorisblue) {
+            while (ods2.getLightDetected() > MIDDLE_REFLECTIVITY && program.opModeIsActive()) {
+                ldrive(-AUTONOMOUS_DRIVE_SPEED);
+                rdrive(-AUTONOMOUS_DRIVE_SPEED);
+            }
+        }
+
+        //Drives forward to the correct side of theline if on red side
+        else {
+            while (ods2.getLightDetected() > MIDDLE_REFLECTIVITY && program.opModeIsActive()) {
+                ldrive(AUTONOMOUS_DRIVE_SPEED);
+                rdrive(AUTONOMOUS_DRIVE_SPEED);
+            }
+        }
+            //Makes the robot turn left if it is off of the line, right if it is on the line, and straight otherwise, then stops once close enough to the beacon(might be too laggy with all of the arithmetic)
+            while(ods.getLightDetected() < BEACON_DISTANCE && program.opModeIsActive()) {
+                double speed = (AUTONOMOUS_DRIVE_SPEED + 0.1) -  AUTONOMOUS_DRIVE_SPEED * (ods.getLightDetected() / BEACON_DISTANCE);
+                ldrive(speed + speed * ((MIDDLE_REFLECTIVITY - ods2.getLightDetected()) / (LINE_REFLECTIVITY - MIDDLE_REFLECTIVITY)));
+                rdrive(speed - speed * ((MIDDLE_REFLECTIVITY - ods2.getLightDetected()) / (LINE_REFLECTIVITY - MIDDLE_REFLECTIVITY)));
+            }
+
+        //Brakes
+        ldrive(0);
+        rdrive(0);*/
+
+
+        //Optional thing to replace line following(light sensor would be exactly in the middle of the robot for this)
+        //Turns 90 from the starting angle to face the beacon
+        updateGyro();
+        if(colorisblue)
+            gyroTurn(startingAngle - heading - 90);
+        else
+            gyroTurn(startingAngle - heading + 90);
+
+        //Drives until close enough, and gets slower as it goes(replace with line following, go straight for testing
         while(ods.getLightDetected() < BEACON_DISTANCE && program.opModeIsActive()) {
             ldrive((AUTONOMOUS_DRIVE_SPEED + 0.1) -  AUTONOMOUS_DRIVE_SPEED * (ods.getLightDetected() / BEACON_DISTANCE));
             rdrive((AUTONOMOUS_DRIVE_SPEED + 0.1) -  AUTONOMOUS_DRIVE_SPEED * (ods.getLightDetected() / BEACON_DISTANCE));
         }
+
+        //Takes current position for later use
+        updateGyro();
+        double preTurnHeading = heading;
 
         //Turns depending on color
         if((colorisblue && color.blue() > color.red()) || (!colorisblue&& color.blue() < color.red()))
@@ -282,5 +341,10 @@ public class SupersHardwareMap {
         //Brakes
         ldrive(0);
         rdrive(0);
+
+        //Turns back so that the robot isn't misaligned
+        updateGyro();
+        gyroTurn(preTurnHeading - heading);
+        //Add in double check here(maybe use a do-while loop)
     }
 }
