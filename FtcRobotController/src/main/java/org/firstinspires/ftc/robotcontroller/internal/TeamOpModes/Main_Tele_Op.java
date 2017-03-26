@@ -52,10 +52,10 @@ public class Main_Tele_Op extends OpMode {
     public void reverse(){
         //Makes the controller drive the robot with the intake as the front if the dpad is pressed up
         if(gamepad1.dpad_up)
-            robot.blue = true;
+            robot.notreversed = true;
         //Makes the controller drive the robot with the intake as the back if the dpad is pressed down
         else if(gamepad1.dpad_down)
-            robot.blue = false;
+            robot.notreversed = false;
     }
 
     //Rotates flicker backwards when left trigger is held, shoots when right trigger is held (move to second gamepad for drive practice)
