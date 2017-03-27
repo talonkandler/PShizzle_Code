@@ -9,14 +9,17 @@ public class Red_Shoot_Beacons_Middle extends LinearOpMode {
         //Sets up the hardware map
         SupersHardwareMap robot = new SupersHardwareMap(false, true, this);
         robot.init(hardwareMap);
+        waitForStart();
 
-        //Drives forward and shoots twice then turns towards the beacon line
-        robot.driveInches(12, 2);
+        /*//Drives forward and shoots twice then turns towards the beacon line
+        robot.driveInches(13, 2);
+        robot.timer.reset();
+        while(robot.timer.seconds() < 0.25){}
         robot.moveFlicker(1, 1);
         robot.timer.reset();
         while(robot.timer.seconds() < 1){}
         robot.moveFlicker(1, 1);
-        robot.gyroTurn(-50);
+        robot.gyroTurn(-50);*/
 
         //Drives towards line and follows it, hits beacon, turns towards next beacon and repeats
         robot.hitBeacon(false);
