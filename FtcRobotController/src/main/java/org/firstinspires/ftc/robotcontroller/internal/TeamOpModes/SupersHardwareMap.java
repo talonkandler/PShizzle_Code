@@ -34,7 +34,7 @@ public class SupersHardwareMap {
 
     //Declaring public constants(change to user preference/measurements)
     public static final double WHEEL_DIAMETER = 4 + 7/8;//Unit: inches, measure as current number probably isn't accurate
-    public static final double AUTONOMOUS_DRIVE_SPEED = 0.15f;
+    public static final double AUTONOMOUS_DRIVE_SPEED = 0.3f;
     public static final double TELEOP_DRIVE_SPEED = 1f;
     public static final double INTAKE_SPEED = -1f;
     public static final double FLICKER_SPEED = 0.8f;
@@ -190,7 +190,7 @@ public class SupersHardwareMap {
         //Sets the target position based on the amount of inches to be covered and the starting position
         fleft.setTargetPosition((int) java.lang.Math.floor((inches / (WHEEL_DIAMETER * 3.1416)) * 1120) + fleft.getCurrentPosition()); //Change 1120 based on motor type
         //Right motors are reversed, so negative encoder values should hopefully compensate for that
-        //fright.setTargetPosition((int) - java.lang.Math.floor((inches / (WHEEL_DIAMETER * 3.1416)) * 1120) + fright.getCurrentPosition()); //Change 1120 based on motor type
+        fright.setTargetPosition((int) - java.lang.Math.floor((inches / (WHEEL_DIAMETER * 3.1416)) * 1120) + fright.getCurrentPosition()); //Change 1120 based on motor type
 
         //Sets motor power based on the default autonomous speed and the power coefficient parameter
         fleft.setPower(powerCoefficient * AUTONOMOUS_DRIVE_SPEED);
@@ -200,8 +200,8 @@ public class SupersHardwareMap {
 
         //If this is too laggy, it may work better to use just one encoder
         //Keeps moving the wheels until they are within 10 encoder ticks of the target value
-        while(Math.abs(fleft.getTargetPosition() - fleft.getCurrentPosition()) > 20 /* || Math.abs(fright.getTargetPosition() - fright.getCurrentPosition()) > 20*/ && program.opModeIsActive()) {
-           /* //Turns off right or left wheels individually if they reach the target position first
+        while(Math.abs(fleft.getTargetPosition() - fleft.getCurrentPosition()) > 20  || Math.abs(fright.getTargetPosition() - fright.getCurrentPosition()) > 20 && program.opModeIsActive()) {
+            //Turns off right or left wheels individually if they reach the target position first
             if(Math.abs(fleft.getTargetPosition() - fleft.getCurrentPosition()) <= 20 && fleft.getPower() != 0) {
                 fleft.setPower(0);
                 bleft.setPower(0);
@@ -210,7 +210,7 @@ public class SupersHardwareMap {
                 fright.setPower(0);
                 bright.setPower(0);
             }
-            */
+
             //Sends telemetry for debugging
             program.telemetry.addData("fleft target", fleft.getTargetPosition());
             program.telemetry.addData("fleft current", fleft.getCurrentPosition());

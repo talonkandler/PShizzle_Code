@@ -11,11 +11,12 @@ public class Red_Shoot_Beacons_Middle extends LinearOpMode {
         robot.init(hardwareMap);
 
         //Drives forward and shoots twice then turns towards the beacon line
-        robot.driveInches(10, 1);
+        robot.driveInches(12, 2);
         robot.moveFlicker(1, 1);
-        robot.delay(1);
+        robot.timer.reset();
+        while(robot.timer.seconds() < 1){}
         robot.moveFlicker(1, 1);
-        robot.gyroTurn(50);
+        robot.gyroTurn(-50);
 
         //Drives towards line and follows it, hits beacon, turns towards next beacon and repeats
         robot.hitBeacon(false);
@@ -23,17 +24,14 @@ public class Red_Shoot_Beacons_Middle extends LinearOpMode {
         robot.driveInches(10, 1);
         robot.hitBeacon(false);
 
-        //Turns towards the cap ball, drives into it, turns to fling it off to the side, then turns back and parks on center platform
-        robot.gyroTurn(145);
+        //Turns towards the cap ball, shoves it, and parks on center platform
+        robot.gyroTurn(135);
         while(robot.ods.getLightDetected() < .9) {
             robot.ldrive(robot.AUTONOMOUS_DRIVE_SPEED);
             robot.rdrive(robot.AUTONOMOUS_DRIVE_SPEED);
         }
         robot.ldrive(0);
         robot.rdrive(0);
-        robot.gyroTurn(20);
-        robot.delay(0.5);
-        robot.gyroTurn(-20);
         robot.driveInches(5, 1);
     }
 }
