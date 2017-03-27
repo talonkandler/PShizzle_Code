@@ -74,7 +74,7 @@ public class Main_Tele_Op extends OpMode {
 
     //When joystick is pushed up, the intake motor pushes balls out, when it is pushed down, the intake motor pulls balls in
     public void runIntake() {
-        if(Math.abs(gamepad2.left_stick_y) > threshold)
+        if(Math.abs(gamepad2.right_stick_y) > threshold)
             robot.intake.setPower(-gamepad2.left_stick_y * robot.INTAKE_SPEED);
         else
             robot.intake.setPower(0);
