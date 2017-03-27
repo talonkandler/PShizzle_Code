@@ -256,14 +256,14 @@ public class SupersHardwareMap {
         //Turns the correct direction until the angle has been reached
         if (degrees <= 0) {
             while (heading > degrees + gyroHeadingInitial && program.opModeIsActive()) {
-                ldrive(2 * AUTONOMOUS_DRIVE_SPEED);
-                rdrive(- 2 * AUTONOMOUS_DRIVE_SPEED);
+                ldrive(1.5 * AUTONOMOUS_DRIVE_SPEED);
+                rdrive(- 1.5 * AUTONOMOUS_DRIVE_SPEED);
                 updateGyro();
             }
         } else {
             while (heading < degrees + gyroHeadingInitial && program.opModeIsActive()) {
-                rdrive(2 * AUTONOMOUS_DRIVE_SPEED);
-                ldrive(-2 * AUTONOMOUS_DRIVE_SPEED);
+                rdrive(1.5 * AUTONOMOUS_DRIVE_SPEED);
+                ldrive(-1.5 * AUTONOMOUS_DRIVE_SPEED);
                 updateGyro();
             }
         }
@@ -286,7 +286,9 @@ public class SupersHardwareMap {
         ldrive(0);
         rdrive(0);
 
+        //Backs up before turning so that the robot is more lined up with the center of the beacon
         driveInches(-3, -1);
+
         /*//Line Following(sensor on right side of line on blue side)
         //Backs up to be on the correct side of the line if on blue side
         if(colorisblue) {
@@ -296,19 +298,20 @@ public class SupersHardwareMap {
             }
         }
 
-        //Drives forward to the correct side of theline if on red side
+        //Drives forward to the correct side of the line if on red side
         else {
             while (ods2.getLightDetected() > MIDDLE_REFLECTIVITY && program.opModeIsActive()) {
                 ldrive(AUTONOMOUS_DRIVE_SPEED);
                 rdrive(AUTONOMOUS_DRIVE_SPEED);
             }
         }
-            //Makes the robot turn left if it is off of the line, right if it is on the line, and straight otherwise, then stops once close enough to the beacon(might be too laggy with all of the arithmetic)
-            while(ods.getLightDetected() < BEACON_DISTANCE && program.opModeIsActive()) {
-                double speed = (AUTONOMOUS_DRIVE_SPEED + 0.1) -  AUTONOMOUS_DRIVE_SPEED * (ods.getLightDetected() / BEACON_DISTANCE);
-                ldrive(speed + speed * ((MIDDLE_REFLECTIVITY - ods2.getLightDetected()) / (LINE_REFLECTIVITY - MIDDLE_REFLECTIVITY)));
-                rdrive(speed - speed * ((MIDDLE_REFLECTIVITY - ods2.getLightDetected()) / (LINE_REFLECTIVITY - MIDDLE_REFLECTIVITY)));
-            }
+
+        //Makes the robot turn left if it is off of the line, right if it is on the line, and straight otherwise, then stops once close enough to the beacon(might be too laggy with all of the arithmetic)
+        while(ods.getLightDetected() < BEACON_DISTANCE && program.opModeIsActive()) {
+            double speed = (AUTONOMOUS_DRIVE_SPEED + 0.1) -  AUTONOMOUS_DRIVE_SPEED * (ods.getLightDetected() / BEACON_DISTANCE);
+            ldrive(speed + speed * ((MIDDLE_REFLECTIVITY - ods2.getLightDetected()) / (LINE_REFLECTIVITY - MIDDLE_REFLECTIVITY)));
+            rdrive(speed - speed * ((MIDDLE_REFLECTIVITY - ods2.getLightDetected()) / (LINE_REFLECTIVITY - MIDDLE_REFLECTIVITY)));
+        }
 
         //Brakes
         ldrive(0);
@@ -330,12 +333,14 @@ public class SupersHardwareMap {
             rdrive(speed);
         }
 
+        //Brakes
         ldrive(0);
         rdrive(0);
 
+        //Waits half a second to give the color sensor some time
         delay(.5);
 
-        //Turns depending on color
+        //Turns/rocks left or right depending on the color
         if((colorisblue && color.blue() > color.red()) || (!colorisblue && color.blue() < color.red())) {
             rdrive(1 * AUTONOMOUS_DRIVE_SPEED);
             ldrive(-0.5 * AUTONOMOUS_DRIVE_SPEED);
@@ -345,15 +350,16 @@ public class SupersHardwareMap {
             rdrive(-0.5 * AUTONOMOUS_DRIVE_SPEED);
         }
 
+        //Waits for half a second, then brakes
         delay(0.5);
-
         ldrive(0);
         rdrive(0);
 
+        //Drives backwards
         delay(0.5);
-
         driveInches(-8, -1);
 
+        //Turns towards next beacon
         /*if(colorisblue)
             gyroTurn(startingAngle - heading + 85);
         else
