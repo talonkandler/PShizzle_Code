@@ -39,9 +39,9 @@ public class SupersHardwareMap {
     public static final double INTAKE_SPEED = -1f;
     public static final double FLICKER_SPEED = 0.8f;
     public static final double BEACON_DISTANCE = 0.2;
-    public static final double FLOOR_REFLECTIVITY = 300;
-    public static final double LINE_REFLECTIVITY = 700;
-    public static final double MIDDLE_REFLECTIVITY = 450;
+    public static final double FLOOR_REFLECTIVITY = .17;
+    public static final double LINE_REFLECTIVITY = .95;
+    public static final double MIDDLE_REFLECTIVITY = .56;
 
     //Setting up variables used in program, made some public so that they are accessible by other programs
     //Some such as "program" don't need to be accessed by other programs, so they are kept local
@@ -256,14 +256,14 @@ public class SupersHardwareMap {
         //Turns the correct direction until the angle has been reached
         if (degrees <= 0) {
             while (heading > degrees + gyroHeadingInitial && program.opModeIsActive()) {
-                ldrive(.1 + AUTONOMOUS_DRIVE_SPEED * (1 - (heading - gyroHeadingInitial) / degrees));
-                rdrive(-.1 - AUTONOMOUS_DRIVE_SPEED * (1 - (heading - gyroHeadingInitial) / degrees));
+                ldrive(2 * AUTONOMOUS_DRIVE_SPEED);
+                rdrive(- 2 * AUTONOMOUS_DRIVE_SPEED);
                 updateGyro();
             }
         } else {
             while (heading < degrees + gyroHeadingInitial && program.opModeIsActive()) {
-                rdrive(.1 + AUTONOMOUS_DRIVE_SPEED * (1 - (heading - gyroHeadingInitial) / degrees));
-                ldrive(-.1 - AUTONOMOUS_DRIVE_SPEED * (1 - (heading - gyroHeadingInitial) / degrees));
+                rdrive(2 * AUTONOMOUS_DRIVE_SPEED);
+                ldrive(-2 * AUTONOMOUS_DRIVE_SPEED);
                 updateGyro();
             }
         }
@@ -277,15 +277,16 @@ public class SupersHardwareMap {
     //For the time being, only use in autonomous
     public void hitBeacon(boolean colorisblue) {
         //Drives until line is found
-        while(ods2.getLightDetected() < LINE_REFLECTIVITY * 0.9 && program.opModeIsActive()) {
-            ldrive(AUTONOMOUS_DRIVE_SPEED);
-            rdrive(AUTONOMOUS_DRIVE_SPEED);
+        while(ods2.getLightDetected() < MIDDLE_REFLECTIVITY && program.opModeIsActive()) {
+            ldrive(0.75 * AUTONOMOUS_DRIVE_SPEED);
+            rdrive(0.75 * AUTONOMOUS_DRIVE_SPEED);
         }
 
         //Brakes
         ldrive(0);
         rdrive(0);
 
+        driveInches(-3, -1);
         /*//Line Following(sensor on right side of line on blue side)
         //Backs up to be on the correct side of the line if on blue side
         if(colorisblue) {
@@ -318,39 +319,44 @@ public class SupersHardwareMap {
         //Turns 90 from the starting angle to face the beacon
         updateGyro();
         if(colorisblue)
-            gyroTurn(startingAngle - heading - 90);
+            gyroTurn(startingAngle - heading - 85);
         else
-            gyroTurn(startingAngle - heading + 90);
+            gyroTurn(startingAngle - heading + 85);
 
         //Drives until close enough, and gets slower as it goes(replace with line following, go straight for testing
         while(ods.getLightDetected() < BEACON_DISTANCE && program.opModeIsActive()) {
-            ldrive((AUTONOMOUS_DRIVE_SPEED * .33 + 0.05) -  AUTONOMOUS_DRIVE_SPEED * .33 * (ods.getLightDetected() / BEACON_DISTANCE));
-            rdrive((AUTONOMOUS_DRIVE_SPEED * .33 + 0.05) -  AUTONOMOUS_DRIVE_SPEED * .33 * (ods.getLightDetected() / BEACON_DISTANCE));
+            double speed = (AUTONOMOUS_DRIVE_SPEED * .2 + 0.05) -  AUTONOMOUS_DRIVE_SPEED * .2 * (ods.getLightDetected() / BEACON_DISTANCE);
+            ldrive(speed);
+            rdrive(speed);
         }
 
         ldrive(0);
         rdrive(0);
-
-        //Takes current position for later use
-        updateGyro();
-        double preTurnHeading = heading;
 
         delay(.5);
 
         //Turns depending on color
         if((colorisblue && color.blue() > color.red()) || (!colorisblue && color.blue() < color.red())) {
-            rdrive(2 * AUTONOMOUS_DRIVE_SPEED);
-            ldrive(-1 * AUTONOMOUS_DRIVE_SPEED);
+            rdrive(1 * AUTONOMOUS_DRIVE_SPEED);
+            ldrive(-0.5 * AUTONOMOUS_DRIVE_SPEED);
         }
         else {
-            ldrive(2 * AUTONOMOUS_DRIVE_SPEED);
-            rdrive(-1 * AUTONOMOUS_DRIVE_SPEED);
+            ldrive(1 * AUTONOMOUS_DRIVE_SPEED);
+            rdrive(-0.5 * AUTONOMOUS_DRIVE_SPEED);
         }
+
         delay(0.5);
 
         ldrive(0);
         rdrive(0);
 
-        driveInches(-5, -1);
+        delay(0.5);
+
+        driveInches(-8, -1);
+
+        /*if(colorisblue)
+            gyroTurn(startingAngle - heading + 85);
+        else
+            gyroTurn(startingAngle - heading - 85);*/
     }
 }
