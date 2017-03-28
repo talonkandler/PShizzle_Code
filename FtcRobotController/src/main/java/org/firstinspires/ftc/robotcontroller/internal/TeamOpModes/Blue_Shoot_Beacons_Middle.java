@@ -28,7 +28,7 @@ public class Blue_Shoot_Beacons_Middle extends LinearOpMode {
         robot.hitBeacon(true);
 
         //Turns towards the cap ball, shoves it, and parks on center platform
-        robot.gyroTurn(-122);
+        robot.gyroTurn(-115);
 
         robot.color.enableLed(true);
 

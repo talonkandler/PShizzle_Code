@@ -38,7 +38,7 @@ public class SupersHardwareMap {
     public static final double TELEOP_DRIVE_SPEED = 1f;
     public static final double INTAKE_SPEED = -1f;
     public static final double FLICKER_SPEED = 0.8f;
-    public static final double BEACON_DISTANCE = 0.15;
+    public static final double BEACON_DISTANCE = 0.2;
     public static final double FLOOR_REFLECTIVITY = .17;
     public static final double LINE_REFLECTIVITY = .95;
     public static final double MIDDLE_REFLECTIVITY = .56;
@@ -289,7 +289,7 @@ public class SupersHardwareMap {
         delay(0.15);
 
         //Backs up before turning so that the robot is more lined up with the center of the beacon
-        driveInches(-3.5, -1);
+        driveInches(-4, -1);
 
         delay(0.15);
 
@@ -303,7 +303,7 @@ public class SupersHardwareMap {
 
         //Drives until close enough, and gets slower as it goes(replace with line following, go straight for testing
         while(ods.getLightDetected() < BEACON_DISTANCE && program.opModeIsActive()) {
-            double speed = (AUTONOMOUS_DRIVE_SPEED * .5 + 0.05) -  (AUTONOMOUS_DRIVE_SPEED * .5) * (ods.getLightDetected() / BEACON_DISTANCE);
+            double speed = (AUTONOMOUS_DRIVE_SPEED * .35 + 0.03) -  (AUTONOMOUS_DRIVE_SPEED * .35) * (ods.getLightDetected() / BEACON_DISTANCE);
             ldrive(speed);
             rdrive(speed);
         }
