@@ -11,8 +11,8 @@ public class Blue_Shoot_Beacons_Middle extends LinearOpMode {
         robot.init(hardwareMap);
         waitForStart();
 
-        /*//Drives forward and shoots twice then turns towards the beacon line
-        robot.driveInches(13, 2);
+        //Drives forward and shoots twice then turns towards the beacon line
+        /*robot.driveInches(20, 2);
         robot.timer.reset();
         while(robot.timer.seconds() < 0.25){}
         robot.moveFlicker(1, 1);

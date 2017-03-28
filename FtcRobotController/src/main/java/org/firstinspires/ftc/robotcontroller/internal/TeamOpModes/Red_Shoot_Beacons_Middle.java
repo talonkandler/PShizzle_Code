@@ -28,13 +28,13 @@ public class Red_Shoot_Beacons_Middle extends LinearOpMode {
         robot.hitBeacon(false);
 
         //Turns towards the cap ball, shoves it, and parks on center platform
-        robot.gyroTurn(115);
+        robot.gyroTurn(112.5);
         while(robot.ods.getLightDetected() < .5) {
             robot.ldrive(1.5 * robot.AUTONOMOUS_DRIVE_SPEED);
             robot.rdrive(1.5 * robot.AUTONOMOUS_DRIVE_SPEED);
         }
         robot.ldrive(0);
         robot.rdrive(0);
-        robot.driveInches(5, 1);
+        robot.driveInches(60, 1);
     }
 }

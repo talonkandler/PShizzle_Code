@@ -5,9 +5,9 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 //Adding this program to the phones
-@TeleOp(name = "Main TeleOp", group = "TeleOp")
+@TeleOp(name = "Special TeleOp", group = "TeleOp")
 
-public class Main_Tele_Op extends OpMode {
+public class Special_Tele_Op extends OpMode {
     //Setting up robot class
     SupersHardwareMap robot = new SupersHardwareMap(true, false);
 
@@ -35,18 +35,34 @@ public class Main_Tele_Op extends OpMode {
 
     //Drives right drive motors based on right joystick and left drive motors based on left joystick
     public void runWheels() {
-            //Threshold ensures that the motors wont move when joystick is released even if the joysticks don't reset exactly to 0
-            if (Math.abs(gamepad1.left_stick_y) > threshold)
-                robot.ldrive(-gamepad1.left_stick_y * driveSpeed);
-            else if (gamepad1.right_bumper || gamepad1.left_bumper){}
-            else
-                robot.ldrive(0);
-
-            if (Math.abs(gamepad1.right_stick_y) > threshold)
+        //Threshold ensures that the motors wont move when joystick is released even if the joysticks don't reset exactly to 0
+            if(gamepad2.left_stick_y != 0) {
+                robot.notreversed = true;
+                robot.ldrive(-gamepad2.left_stick_y * robot.TELEOP_DRIVE_SPEED);
+            }
+            else if(gamepad1.right_stick_y != 0){
+                robot.notreversed = false;
                 robot.rdrive(-gamepad1.right_stick_y * driveSpeed);
-            else if (gamepad1.right_bumper || gamepad1.left_bumper){}
-            else
-                robot.rdrive(0);
+            }
+            else {
+                if(!gamepad1.right_bumper && !gamepad1.left_bumper) {
+                robot.fleft.setPower(0);
+                robot.bleft.setPower(0);
+                }
+            }
+
+            if (gamepad2.right_stick_y != 0) {
+                robot.notreversed = true;
+                robot.rdrive(-gamepad2.right_stick_y * robot.TELEOP_DRIVE_SPEED);
+            } else if (gamepad1.left_stick_y != 0) {
+                robot.notreversed = false;
+                robot.ldrive(-gamepad1.left_stick_y * driveSpeed);
+            } else {
+                if(!gamepad1.right_bumper && !gamepad1.left_bumper) {
+                    robot.fright.setPower(0);
+                    robot.bright.setPower(0);
+                }
+            }
     }
 
     //Changes the front of the robot for driving purposes when dpad up or down is pressed
@@ -54,7 +70,7 @@ public class Main_Tele_Op extends OpMode {
         //Makes the controller drive the robot with the intake as the front if the dpad is pressed up
         if(gamepad1.dpad_up)
             robot.notreversed = true;
-        //Makes the controller drive the robot with the intake as the back if the dpad is pressed down
+            //Makes the controller drive the robot with the intake as the back if the dpad is pressed down
         else if(gamepad1.dpad_down)
             robot.notreversed = false;
         //Slows down the drive speed when the left trigger is pressed
@@ -63,11 +79,7 @@ public class Main_Tele_Op extends OpMode {
 
     //Rotates flicker backwards when left trigger is held, shoots when right trigger is held (move to second gamepad for drive practice)
     public void flickers(){
-        if(gamepad2.left_trigger > 0.8)
-            robot.flicker.setPower(-robot.FLICKER_SPEED * 0.5);
-        else if(gamepad2.right_trigger > 0.8)
-            robot.flicker.setPower(robot.FLICKER_SPEED * 0.5);
-        else if(gamepad2.a)
+        if(gamepad1.right_trigger > 0.8)
             robot.moveFlicker(1, 1);
         else
             robot.flicker.setPower(0);
@@ -75,8 +87,10 @@ public class Main_Tele_Op extends OpMode {
 
     //When joystick is pushed up, the intake motor pushes balls out, when it is pushed down, the intake motor pulls balls in
     public void runIntake() {
-        if(Math.abs(gamepad2.right_stick_y) > threshold)
-            robot.intake.setPower(-gamepad2.left_stick_y * robot.INTAKE_SPEED);
+        if(Math.abs(gamepad2.right_trigger) > 0.1)
+            robot.intake.setPower(gamepad2.right_trigger * robot.INTAKE_SPEED);
+        else if(Math.abs(gamepad2.left_trigger) > 0.1)
+            robot.intake.setPower(gamepad2.left_trigger * -robot.INTAKE_SPEED);
         else
             robot.intake.setPower(0);
     }

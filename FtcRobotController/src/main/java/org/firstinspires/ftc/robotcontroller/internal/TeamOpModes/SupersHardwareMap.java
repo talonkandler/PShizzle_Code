@@ -29,16 +29,16 @@ public class SupersHardwareMap {
     //Declaring sensor variables                                                                format: "config name" = (category), P(ort)#
     public BNO055IMU imu; //Gyro sensor                                                                 "imu" = I2C (Adafruit IMU), 0
     public OpticalDistanceSensor ods; //Optical distance sensor for stopping in front of the beacon     "color" = I2C (Color Sensor), 1
-    public OpticalDistanceSensor ods2; //Optical distance sensor for finding line                       "ods2" = Analog Input (Optical Distance Sensor), 1
+    public OpticalDistanceSensor ods2; //Optical distance sensor for finding line                       "ods2" = Analog Input (Optical Distance Sensor), 2
     public ColorSensor color; //Color sensor for detecting beacon color                                 "ods" = Analog Input (Optical Distance Sensor), 0
 
     //Declaring public constants(change to user preference/measurements)
     public static final double WHEEL_DIAMETER = 4 + 7/8;//Unit: inches
-    public static final double AUTONOMOUS_DRIVE_SPEED = 0.2f;
+    public static final double AUTONOMOUS_DRIVE_SPEED = 0.25f;
     public static final double TELEOP_DRIVE_SPEED = 1f;
     public static final double INTAKE_SPEED = -1f;
-    public static final double FLICKER_SPEED = 0.8f;
-    public static final double BEACON_DISTANCE = 0.2;
+    public static final double FLICKER_SPEED = 0.6f;
+    public static final double BEACON_DISTANCE = 0.3;
     public static final double FLOOR_REFLECTIVITY = .17;
     public static final double LINE_REFLECTIVITY = .95;
     public static final double MIDDLE_REFLECTIVITY = .56;
@@ -142,8 +142,15 @@ public class SupersHardwareMap {
 
     //Waits a certain amount of time, useful for waiting without having to manually reset the timer and all that every time
     public void delay(double seconds) {
-        timer.reset();
-        while (timer.seconds() < seconds){}
+        if(autonomous) {
+            timer.reset();
+            while (timer.seconds() < seconds && program.opModeIsActive()) {
+            }
+        }
+        else {
+            timer.reset();
+            while (timer.seconds() < seconds){}
+        }
     }
 
     //Runs the flicker a specified number of rotations at the default flicker speed times the specified power coefficient(negative to go backwards)
@@ -245,6 +252,8 @@ public class SupersHardwareMap {
         //Puts formatted angle in heading variable and sets the current value as last value for the next cycle
         heading = gyroAdd - rawGyro;
         lastHeading = rawGyro;
+        program.telemetry.addData("gyro heading:", heading);
+        program.telemetry.update();
     }
 
     //Turns the robot a specified number of degrees, clockwise = negative angle
@@ -256,14 +265,14 @@ public class SupersHardwareMap {
         //Turns the correct direction until the angle has been reached
         if (degrees <= 0) {
             while (heading > degrees + gyroHeadingInitial && program.opModeIsActive()) {
-                ldrive(2 * AUTONOMOUS_DRIVE_SPEED);
-                rdrive(- 2 * AUTONOMOUS_DRIVE_SPEED);
+                ldrive(1.75 * AUTONOMOUS_DRIVE_SPEED);
+                rdrive(- 1.75 * AUTONOMOUS_DRIVE_SPEED);
                 updateGyro();
             }
         } else {
             while (heading < degrees + gyroHeadingInitial && program.opModeIsActive()) {
-                rdrive(2 * AUTONOMOUS_DRIVE_SPEED);
-                ldrive(- 2 * AUTONOMOUS_DRIVE_SPEED);
+                rdrive(1.75 * AUTONOMOUS_DRIVE_SPEED);
+                ldrive(- 1.75 * AUTONOMOUS_DRIVE_SPEED);
                 updateGyro();
             }
         }
@@ -297,13 +306,13 @@ public class SupersHardwareMap {
         //Turns 90 from the starting angle to face the beacon
         updateGyro();
         if(colorisblue)
-            gyroTurn(startingAngle - heading - 80);
+            gyroTurn(startingAngle - heading - 85);
         else
-            gyroTurn(startingAngle - heading + 80);
+            gyroTurn(startingAngle - heading + 85);
 
         //Drives until close enough, and gets slower as it goes(replace with line following, go straight for testing
         while(ods.getLightDetected() < BEACON_DISTANCE && program.opModeIsActive()) {
-            double speed = (AUTONOMOUS_DRIVE_SPEED * .35 + 0.03) -  (AUTONOMOUS_DRIVE_SPEED * .35) * (ods.getLightDetected() / BEACON_DISTANCE);
+            double speed = (AUTONOMOUS_DRIVE_SPEED * .4 + 0.07) -  (AUTONOMOUS_DRIVE_SPEED * .45) * (ods.getLightDetected() / BEACON_DISTANCE);
             ldrive(speed);
             rdrive(speed);
         }
@@ -313,7 +322,7 @@ public class SupersHardwareMap {
         rdrive(0);
 
         //Waits half a second to give the color sensor some time
-        delay(.15);
+        delay(.5);
 
         //Turns/rocks left or right depending on the color
         if((colorisblue && color.blue() > color.red()) || (!colorisblue && color.blue() < color.red())) {
@@ -321,7 +330,7 @@ public class SupersHardwareMap {
             ldrive(-0.5 * AUTONOMOUS_DRIVE_SPEED);
         }
         else {
-            ldrive(1 * AUTONOMOUS_DRIVE_SPEED);
+            ldrive(AUTONOMOUS_DRIVE_SPEED);
             rdrive(-0.5 * AUTONOMOUS_DRIVE_SPEED);
         }
 
