@@ -81,6 +81,7 @@ public class SupersHardwareMap {
         fright.setDirection(DcMotor.Direction.REVERSE);
         bright.setDirection(DcMotor.Direction.REVERSE);
         //May have to reverse flicker or intake
+        flicker.setDirection(DcMotor.Direction.REVERSE);
 
         //Sets motors to the mode that runs them at a constant power (not enough drive motor encoders to make them run at a constant speed, but that would be preferable for autonomous)
         fleft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);

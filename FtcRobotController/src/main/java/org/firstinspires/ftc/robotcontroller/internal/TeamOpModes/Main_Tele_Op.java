@@ -64,10 +64,10 @@ public class Main_Tele_Op extends OpMode {
 
     //Rotates flicker backwards when left trigger is held, shoots when right trigger is held (move to second gamepad for drive practice)
     public void flickers(){
-        if(gamepad2.left_trigger > 0.8)
-            robot.flicker.setPower(-robot.FLICKER_SPEED * 0.5);
-        else if(gamepad2.right_trigger > 0.8)
-            robot.flicker.setPower(robot.FLICKER_SPEED * 0.5);
+        if(gamepad2.left_trigger > 0.2)
+            robot.flicker.setPower(gamepad2.left_trigger * robot.FLICKER_SPEED * 0.5);
+        else if(gamepad2.right_trigger > 0.2)
+            robot.flicker.setPower(gamepad2.right_trigger * -robot.FLICKER_SPEED * 0.5);
         else if(gamepad2.a)
             moveFlicker(1, 1);
         else
@@ -99,19 +99,19 @@ public class Main_Tele_Op extends OpMode {
 
     //Runs the flicker a specified number of rotations at the default flicker speed times the specified power coefficient(negative to go backwards)
     public void moveFlicker(double rotations, double powerCoefficient) {
-        //Sets the flicker to use the encoder
-        robot.flicker.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        //Sets the flicker to run at a constant speed
+        robot.flicker.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         //Sets target position for encoder
         //May have to change based on gear reduction, multiply by 1/2 for 20 and 3/2 for 60, 40 is standard
         //1440 is one rotation for tetrix, 1120 is one rotation for AndyMark
-        robot.flicker.setTargetPosition((int) java.lang.Math.floor(rotations * 1120) + robot.flicker.getCurrentPosition());
+        robot.flicker.setTargetPosition((int) java.lang.Math.floor(rotations * 3/2 * 1120) + robot.flicker.getCurrentPosition());
 
         //Sets the power
-        robot.flicker.setPower(powerCoefficient * robot.FLICKER_SPEED);
+        robot.flicker.setPower(-powerCoefficient * robot.FLICKER_SPEED);
 
-        //Runs the flicker until the target position is reached
-        while(Math.abs(robot.flicker.getTargetPosition() + robot.flicker.getCurrentPosition()) > 10) {
+        //Runs the flicker until slightly before the target position is reached, but once it brakes it will be in the right place
+        while(Math.abs(robot.flicker.getTargetPosition() - robot.flicker.getCurrentPosition()) > 100) {
             telemetry.addData("Flicker target:", robot.flicker.getTargetPosition());
             telemetry.addData("Flicker current:", robot.flicker.getCurrentPosition());
             telemetry.update();
