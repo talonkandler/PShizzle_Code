@@ -111,7 +111,7 @@ public class Main_Tele_Op extends OpMode {
         robot.flicker.setPower(-powerCoefficient * robot.FLICKER_SPEED);
 
         //Runs the flicker until slightly before the target position is reached, but once it brakes it will be in the right place
-        while(Math.abs(robot.flicker.getTargetPosition() - robot.flicker.getCurrentPosition()) > 100) {
+        while(Math.abs(robot.flicker.getTargetPosition() - robot.flicker.getCurrentPosition()) > 120) {
             telemetry.addData("Flicker target:", robot.flicker.getTargetPosition());
             telemetry.addData("Flicker current:", robot.flicker.getCurrentPosition());
             telemetry.update();
@@ -126,9 +126,9 @@ public class Main_Tele_Op extends OpMode {
         telemetry.addData("Instructions:","(C = controller)");
         telemetry.addData("Tank Drive:", "C1, L/R joysticks");
         telemetry.addData("Set Front(Reverse):", "C1, up and down on dpad");
+        telemetry.addData("Beacon Swivel:", "C1, L/R bumpers");
         telemetry.addData("Adjust Flicker position:", "C2, L/R triggers");
         telemetry.addData("Shoot:", "C2, a button");
-        telemetry.addData("Pull in balls:", "C2, L joystick down");
-        telemetry.addData("Push out balls:", "C2, L joystick up");
+        telemetry.addData("Run Intake:", "C2, R joystick");
     }
 }

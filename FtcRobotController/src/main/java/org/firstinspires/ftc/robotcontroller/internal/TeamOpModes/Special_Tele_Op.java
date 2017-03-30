@@ -27,7 +27,6 @@ public class Special_Tele_Op extends OpMode {
     @Override
     public void loop() {
         runWheels();
-        reverseAndSpeed();
         flickers();
         runIntake();
         rock();
@@ -36,6 +35,9 @@ public class Special_Tele_Op extends OpMode {
 
     //Drives right drive motors based on right joystick and left drive motors based on left joystick
     public void runWheels() {
+        //Lowers speed when left trigger is held down
+        driveSpeed = robot.TELEOP_DRIVE_SPEED - 0.8 * Math.abs(gamepad1.left_trigger);
+
         //Threshold ensures that the motors wont move when joystick is released even if the joysticks don't reset exactly to 0
             if(gamepad2.left_stick_y != 0) {
                 robot.notreversed = true;
@@ -66,19 +68,8 @@ public class Special_Tele_Op extends OpMode {
             }
     }
 
-    //Changes the front of the robot for driving purposes when dpad up or down is pressed
-    public void reverseAndSpeed(){
-        //Makes the controller drive the robot with the intake as the front if the dpad is pressed up
-        if(gamepad1.dpad_up)
-            robot.notreversed = true;
-            //Makes the controller drive the robot with the intake as the back if the dpad is pressed down
-        else if(gamepad1.dpad_down)
-            robot.notreversed = false;
-        //Slows down the drive speed when the left trigger is pressed
-        driveSpeed = robot.TELEOP_DRIVE_SPEED - 0.8 * Math.abs(gamepad1.left_trigger);
-    }
 
-    //Rotates flicker backwards when left trigger is held, shoots when right trigger is held (move to second gamepad for drive practice)
+    //Shoots when right trigger is pressed
     public void flickers(){
         if(gamepad1.right_trigger > 0.8)
             moveFlicker(1, 1);
@@ -113,19 +104,19 @@ public class Special_Tele_Op extends OpMode {
 
     //Runs the flicker a specified number of rotations at the default flicker speed times the specified power coefficient(negative to go backwards)
     public void moveFlicker(double rotations, double powerCoefficient) {
-        //Sets the flicker to use the encoder
-        robot.flicker.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        //Sets the flicker to run at a constant speed
+        robot.flicker.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         //Sets target position for encoder
         //May have to change based on gear reduction, multiply by 1/2 for 20 and 3/2 for 60, 40 is standard
         //1440 is one rotation for tetrix, 1120 is one rotation for AndyMark
-        robot.flicker.setTargetPosition((int) java.lang.Math.floor(rotations * 1120) + robot.flicker.getCurrentPosition());
+        robot.flicker.setTargetPosition((int) java.lang.Math.floor(rotations * 3/2 * 1120) + robot.flicker.getCurrentPosition());
 
         //Sets the power
-        robot.flicker.setPower(powerCoefficient * robot.FLICKER_SPEED);
+        robot.flicker.setPower(-powerCoefficient * robot.FLICKER_SPEED);
 
-        //Runs the flicker until the target position is reached
-        while(Math.abs(robot.flicker.getTargetPosition() - robot.flicker.getCurrentPosition()) > 10) {
+        //Runs the flicker until slightly before the target position is reached, but once it brakes it will be in the right place
+        while(Math.abs(robot.flicker.getTargetPosition() - robot.flicker.getCurrentPosition()) > 120) {
             telemetry.addData("Flicker target:", robot.flicker.getTargetPosition());
             telemetry.addData("Flicker current:", robot.flicker.getCurrentPosition());
             telemetry.update();
@@ -138,11 +129,11 @@ public class Special_Tele_Op extends OpMode {
     //Tells how to control robot for drivers, debugging info can be added here
     public void Telemetry(){
         telemetry.addData("Instructions:","(C = controller)");
-        telemetry.addData("Tank Drive:", "C1, L/R joysticks");
-        telemetry.addData("Set Front(Reverse):", "C1, up and down on dpad");
-        telemetry.addData("Adjust Flicker position:", "C2, L/R triggers");
-        telemetry.addData("Shoot:", "C2, a button");
-        telemetry.addData("Pull in balls:", "C2, L joystick down");
-        telemetry.addData("Push out balls:", "C2, L joystick up");
+        telemetry.addData("Drive (Reversed):", "C1, L/R joysticks");
+        telemetry.addData("Lower C1 Drive Speed:", "C1, L trigger");
+        telemetry.addData("Shoot:", "C1, R trigger");
+        telemetry.addData("Beacon Swivel:", "C1, L/R bumpers");
+        telemetry.addData("Drive (Normal):", "C2, L/R joysticks");
+        telemetry.addData("Run Intake:", "C2, L/R triggers");
     }
 }
