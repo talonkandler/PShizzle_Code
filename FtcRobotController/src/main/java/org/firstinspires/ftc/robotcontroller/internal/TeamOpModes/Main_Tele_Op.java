@@ -3,13 +3,14 @@ package org.firstinspires.ftc.robotcontroller.internal.TeamOpModes;
 //Necessary imports
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotor;
 
 //Adding this program to the phones
 @TeleOp(name = "Main TeleOp", group = "TeleOp")
 
 public class Main_Tele_Op extends OpMode {
     //Setting up robot class
-    SupersHardwareMap robot = new SupersHardwareMap(true, false);
+    SupersHardwareMap robot = new SupersHardwareMap(true);
 
     //Setting up global variables
     double driveSpeed = robot.TELEOP_DRIVE_SPEED;
@@ -68,7 +69,7 @@ public class Main_Tele_Op extends OpMode {
         else if(gamepad2.right_trigger > 0.8)
             robot.flicker.setPower(robot.FLICKER_SPEED * 0.5);
         else if(gamepad2.a)
-            robot.moveFlicker(1, 1);
+            moveFlicker(1, 1);
         else
             robot.flicker.setPower(0);
     }
@@ -94,6 +95,30 @@ public class Main_Tele_Op extends OpMode {
             robot.fright.setPower(-0.5);
             robot.bright.setPower(-0.5);
         }
+    }
+
+    //Runs the flicker a specified number of rotations at the default flicker speed times the specified power coefficient(negative to go backwards)
+    public void moveFlicker(double rotations, double powerCoefficient) {
+        //Sets the flicker to use the encoder
+        robot.flicker.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        //Sets target position for encoder
+        //May have to change based on gear reduction, multiply by 1/2 for 20 and 3/2 for 60, 40 is standard
+        //1440 is one rotation for tetrix, 1120 is one rotation for AndyMark
+        robot.flicker.setTargetPosition((int) java.lang.Math.floor(rotations * 1120) + robot.flicker.getCurrentPosition());
+
+        //Sets the power
+        robot.flicker.setPower(powerCoefficient * robot.FLICKER_SPEED);
+
+        //Runs the flicker until the target position is reached
+        while(Math.abs(robot.flicker.getTargetPosition() - robot.flicker.getCurrentPosition()) > 10) {
+            telemetry.addData("Flicker target:", robot.flicker.getTargetPosition());
+            telemetry.addData("Flicker current:", robot.flicker.getCurrentPosition());
+            telemetry.update();
+        }
+
+        //Stops the flicker after the target position is reached
+        robot.flicker.setPower(0);
     }
 
     //Tells how to control robot for drivers, debugging info can be added here
