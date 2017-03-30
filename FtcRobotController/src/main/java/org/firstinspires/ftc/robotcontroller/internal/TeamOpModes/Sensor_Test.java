@@ -8,7 +8,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 @Autonomous(name = "Sensor Test", group = "Sensor")
 public class Sensor_Test extends LinearOpMode {
     public void runOpMode() {
-        SupersHardwareMap robot = new SupersHardwareMap(false, true, this);
+        SupersHardwareMap robot = new SupersHardwareMap(true);
         robot.init(hardwareMap);
         while(1==1 && opModeIsActive()) {
             robot.updateGyro();

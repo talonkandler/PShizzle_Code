@@ -4,7 +4,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
-@Autonomous(name = "Blue_Shoot_Beacons_Cap(test)", group = "Autonomous")
+@Autonomous(name = "Red_Shoot_Beacons_Cap(test)", group = "Autonomous")
 public class Red_Shoot_Beacons_Middle extends LinearOpMode {
     //Setting the hardware map as a global variable
     SupersHardwareMap robot;

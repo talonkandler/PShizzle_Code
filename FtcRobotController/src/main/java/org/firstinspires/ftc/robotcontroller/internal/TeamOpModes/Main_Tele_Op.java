@@ -77,7 +77,7 @@ public class Main_Tele_Op extends OpMode {
     //When joystick is pushed up, the intake motor pushes balls out, when it is pushed down, the intake motor pulls balls in
     public void runIntake() {
         if(Math.abs(gamepad2.right_stick_y) > threshold)
-            robot.intake.setPower(-gamepad2.left_stick_y * robot.INTAKE_SPEED);
+            robot.intake.setPower(-gamepad2.right_stick_y * robot.INTAKE_SPEED);
         else
             robot.intake.setPower(0);
     }
@@ -111,7 +111,7 @@ public class Main_Tele_Op extends OpMode {
         robot.flicker.setPower(powerCoefficient * robot.FLICKER_SPEED);
 
         //Runs the flicker until the target position is reached
-        while(Math.abs(robot.flicker.getTargetPosition() - robot.flicker.getCurrentPosition()) > 10) {
+        while(Math.abs(robot.flicker.getTargetPosition() + robot.flicker.getCurrentPosition()) > 10) {
             telemetry.addData("Flicker target:", robot.flicker.getTargetPosition());
             telemetry.addData("Flicker current:", robot.flicker.getCurrentPosition());
             telemetry.update();
