@@ -1,10 +1,12 @@
-package org.firstinspires.ftc.robotcontroller.internal.TeamOpModes;
+package org.firstinspires.ftc.robotcontroller.internal.OldOpModes;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
+@Disabled
 @TeleOp(name = "Gamepad Test", group = "Sensor")
 public class Gamepad_Input extends OpMode {
 

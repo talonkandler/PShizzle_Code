@@ -1,10 +1,10 @@
-package org.firstinspires.ftc.robotcontroller.internal.TeamOpModes;
+package org.firstinspires.ftc.robotcontroller.internal.OldOpModes;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+@Disabled
 @Autonomous(name = "Sensor Test", group = "Sensor")
 public class Sensor_Test extends LinearOpMode {
     public void runOpMode() {

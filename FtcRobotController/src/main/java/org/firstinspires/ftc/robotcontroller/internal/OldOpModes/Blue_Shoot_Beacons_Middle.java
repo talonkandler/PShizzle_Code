@@ -1,13 +1,14 @@
-package org.firstinspires.ftc.robotcontroller.internal.TeamOpModes;
+package org.firstinspires.ftc.robotcontroller.internal.OldOpModes;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.DcMotor;
 
-@Autonomous(name = "Blue_Shoot_Beacons_Cap(test)", group = "Autonomous")
-public class Blue_Shoot_Beacons_Middle extends LinearOpMode {
-    //Setting the hardware map as a global variable
-    SupersHardwareMap robot;
+@Disabled
+    @Autonomous(name = "Blue_Shoot_Beacons_Cap", group = "Autonomous")
+    public class Blue_Shoot_Beacons_Middle extends LinearOpMode {
+        //Setting the hardware map as a global variable
+        SupersHardwareMap robot;
 
     public void runOpMode(){
         //Sets up the hardware map
@@ -16,14 +17,14 @@ public class Blue_Shoot_Beacons_Middle extends LinearOpMode {
         waitForStart();
 
         //Drives forward and shoots twice then turns towards the beacon line
-        driveInches(20, 2);
+        driveInches(10, 1.5);
         robot.timer.reset();
         while(robot.timer.seconds() < 0.25 && opModeIsActive()){}
         moveFlicker(1, 1);
         robot.timer.reset();
         while(robot.timer.seconds() < 1 && opModeIsActive()){}
         moveFlicker(1, 1);
-        gyroTurn(-50);
+        gyroTurn(-40);
 
         //Drives towards line and follows it, hits beacon, turns towards next beacon and repeats
         hitBeacon(true);
@@ -45,9 +46,6 @@ public class Blue_Shoot_Beacons_Middle extends LinearOpMode {
 
     //Runs the flicker a specified number of rotations at the default flicker speed times the specified power coefficient(negative to go backwards)
     public void moveFlicker(double rotations, double powerCoefficient) {
-        //Sets the flicker to run at a constant speed
-        robot.flicker.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-
         //Sets target position for encoder
         //May have to change based on gear reduction, multiply by 1/2 for 20 and 3/2 for 60, 40 is standard
         //1440 is one rotation for tetrix, 1120 is one rotation for AndyMark
@@ -155,13 +153,20 @@ public class Blue_Shoot_Beacons_Middle extends LinearOpMode {
         while(robot.ods2.getLightDetected() < robot.MIDDLE_REFLECTIVITY && opModeIsActive()) {
             robot.ldrive(0.75 * robot.AUTONOMOUS_DRIVE_SPEED);
             robot.rdrive(0.75 * robot.AUTONOMOUS_DRIVE_SPEED);
+            telemetry.addData("Floor ods value:", robot.ods2.getLightDetected());
         }
 
         //Brakes
         robot.ldrive(0);
         robot.rdrive(0);
 
-        driveInches(-3, -1);
+        /*if(colorisblue)
+            gyroTurn(robot.startingAngle - robot.heading - 5);
+        else
+            gyroTurn(robot.startingAngle - robot.heading + 5);
+
+
+        driveInches(-3, -1);*/
         /*//Line Following(sensor on right side of line on blue side)
         //Backs up to be on the correct side of the line if on blue side
         if(colorisblue) {
@@ -220,13 +225,15 @@ public class Blue_Shoot_Beacons_Middle extends LinearOpMode {
         }
 
         robot.timer.reset();
-        while(robot.timer.seconds() < 0.5 && opModeIsActive()) {}
+        while(robot.timer.seconds() < 0.25 && opModeIsActive()) {}
 
         robot.ldrive(0);
         robot.rdrive(0);
 
-        robot.timer.reset();
-        while(robot.timer.seconds() < 0.5 && opModeIsActive()) {}
+        while(robot.timer.seconds() < 1 && opModeIsActive()) {
+            robot.ldrive(robot.AUTONOMOUS_DRIVE_SPEED * 0.75);
+            robot.rdrive(robot.AUTONOMOUS_DRIVE_SPEED * 0.75);
+        }
 
         driveInches(-8, -1);
 
@@ -234,5 +241,11 @@ public class Blue_Shoot_Beacons_Middle extends LinearOpMode {
             gyroTurn(startingAngle - robot.heading + 85);
         else
             gyroTurn(startingAngle - robot.heading - 85);*/
+
+        robot.updateGyro();
+        if(colorisblue)
+            gyroTurn(robot.startingAngle - robot.heading - 85);
+        else
+            gyroTurn(robot.startingAngle - robot.heading + 85);
     }
 }

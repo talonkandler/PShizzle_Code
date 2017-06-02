@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.robotcontroller.internal.TeamOpModes;
+package org.firstinspires.ftc.robotcontroller.internal.OldOpModes;
 
 import com.qualcomm.hardware.adafruit.BNO055IMU;
 import com.qualcomm.hardware.adafruit.JustLoggingAccelerationIntegrator;
@@ -34,11 +34,11 @@ public class SupersHardwareMap {
 
     //Declaring public constants(change to user preference/measurements)
     public static final double WHEEL_DIAMETER = 4 + 7/8;//Unit: inches, measure as current number probably isn't accurate
-    public static final double AUTONOMOUS_DRIVE_SPEED = 0.2f;
+    public static final double AUTONOMOUS_DRIVE_SPEED = 0.25f;
     public static final double TELEOP_DRIVE_SPEED = 1f;
     public static final double INTAKE_SPEED = -1f;
     public static final double FLICKER_SPEED = 0.8f;
-    public static final double BEACON_DISTANCE = 0.25;
+    public static final double BEACON_DISTANCE = 0.08;
     public static final double FLOOR_REFLECTIVITY = .17;
     public static final double LINE_REFLECTIVITY = .95;
     public static final double MIDDLE_REFLECTIVITY = .56;
@@ -88,6 +88,8 @@ public class SupersHardwareMap {
         fright.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         bleft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         bright.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        //Sets the flicker to run at a constant speed
+        flicker.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         //Setting up data for gyro sensors
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();

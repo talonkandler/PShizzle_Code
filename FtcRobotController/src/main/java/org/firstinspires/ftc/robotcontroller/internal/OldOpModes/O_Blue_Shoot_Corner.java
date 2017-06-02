@@ -1,53 +1,43 @@
-package org.firstinspires.ftc.robotcontroller.internal.TeamOpModes;
+package org.firstinspires.ftc.robotcontroller.internal.OldOpModes;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.DcMotor;
 
-@Autonomous(name = "Red_Shoot_Beacons_Cap(test)", group = "Autonomous")
-public class Red_Shoot_Beacons_Middle extends LinearOpMode {
+@Disabled
+@Autonomous(name = "O_Blue_Shoot_Corner", group = "Autonomous")
+public class O_Blue_Shoot_Corner extends LinearOpMode {
     //Setting the hardware map as a global variable
     SupersHardwareMap robot;
-
-    public void runOpMode(){
+    public void runOpMode() {
         //Sets up the hardware map
         robot = new SupersHardwareMap(false);
         robot.init(hardwareMap);
         waitForStart();
 
         //Drives forward and shoots twice then turns towards the beacon line
-        driveInches(20, 2);
+        driveInches(18, 1.5);
         robot.timer.reset();
-        while(robot.timer.seconds() < 0.25 && opModeIsActive()){}
+        while(robot.timer.seconds() < 1 && opModeIsActive()){}
         moveFlicker(1, 1);
         robot.timer.reset();
         while(robot.timer.seconds() < 1 && opModeIsActive()){}
         moveFlicker(1, 1);
-        gyroTurn(-50);
 
-        //Drives towards line and follows it, hits beacon, turns towards next beacon and repeats
-        hitBeacon(false);
-        gyroTurn(robot.startingAngle - robot.heading + 5);
-        driveInches(10, 1);
-        hitBeacon(false);
+        //Drives forward a bit more, then turns  drives into corner vortex
+        gyroTurn(-85);
 
-        //Turns towards the cap ball, shoves it, and parks on center platform
-        gyroTurn(115);
-
-        robot.color.enableLed(true);
-
-        driveInches(55, 1);
-
+        robot.timer.reset();
+        while(robot.timer.seconds() < 5 && opModeIsActive()){
+            robot.ldrive(robot.AUTONOMOUS_DRIVE_SPEED);
+            robot.rdrive(robot.AUTONOMOUS_DRIVE_SPEED);
+        }
         robot.ldrive(0);
         robot.rdrive(0);
-        driveInches(5, 1);
     }
 
     //Runs the flicker a specified number of rotations at the default flicker speed times the specified power coefficient(negative to go backwards)
     public void moveFlicker(double rotations, double powerCoefficient) {
-        //Sets the flicker to run at a constant speed
-        robot.flicker.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-
         //Sets target position for encoder
         //May have to change based on gear reduction, multiply by 1/2 for 20 and 3/2 for 60, 40 is standard
         //1440 is one rotation for tetrix, 1120 is one rotation for AndyMark
@@ -57,7 +47,7 @@ public class Red_Shoot_Beacons_Middle extends LinearOpMode {
         robot.flicker.setPower(-powerCoefficient * robot.FLICKER_SPEED);
 
         //Runs the flicker until slightly before the target position is reached, but once it brakes it will be in the right place
-        while(Math.abs(robot.flicker.getTargetPosition() - robot.flicker.getCurrentPosition()) > 120) {
+        while(Math.abs(robot.flicker.getTargetPosition() - robot.flicker.getCurrentPosition()) > 120 && opModeIsActive()) {
             telemetry.addData("Flicker target:", robot.flicker.getTargetPosition());
             telemetry.addData("Flicker current:", robot.flicker.getCurrentPosition());
             telemetry.update();
@@ -66,6 +56,7 @@ public class Red_Shoot_Beacons_Middle extends LinearOpMode {
         //Stops the flicker after the target position is reached
         robot.flicker.setPower(0);
     }
+
     //TEST OUT ENCODER VALUES TO SEE WHAT NEEDS TO BE REVERSED
     //Drives the robot a specified number of inches at the default autonomous speed times the specified power coefficient(negative to go backwards)
     //Only use in autonomous
@@ -145,93 +136,5 @@ public class Red_Shoot_Beacons_Middle extends LinearOpMode {
         //Stops wheels
         robot.ldrive(0);
         robot.rdrive(0);
-    }
-
-    //Drives up to the line in front of the beacon, follows it, then hits the beacon
-    //For the time being, only use in autonomous
-    public void hitBeacon(boolean colorisblue) {
-        //Drives until line is found
-        while(robot.ods2.getLightDetected() < robot.MIDDLE_REFLECTIVITY && opModeIsActive()) {
-            robot.ldrive(0.75 * robot.AUTONOMOUS_DRIVE_SPEED);
-            robot.rdrive(0.75 * robot.AUTONOMOUS_DRIVE_SPEED);
-        }
-
-        //Brakes
-        robot.ldrive(0);
-        robot.rdrive(0);
-
-        driveInches(-3, -1);
-        /*//Line Following(sensor on right side of line on blue side)
-        //Backs up to be on the correct side of the line if on blue side
-        if(colorisblue) {
-            while (ods2.getLightDetected() > MIDDLE_REFLECTIVITY && opModeIsActive()) {
-                robot.ldrive(-robot.AUTONOMOUS_DRIVE_SPEED);
-                robot.rdrive(-robot.AUTONOMOUS_DRIVE_SPEED);
-            }
-        }
-        //Drives forward to the correct side of theline if on red side
-        else {
-            while (ods2.getLightDetected() > MIDDLE_REFLECTIVITY && opModeIsActive()) {
-                robot.ldrive(robot.AUTONOMOUS_DRIVE_SPEED);
-                robot.rdrive(robot.AUTONOMOUS_DRIVE_SPEED);
-            }
-        }
-            //Makes the robot turn left if it is off of the line, right if it is on the line, and straight otherwise, then stops once close enough to the beacon(might be too laggy with all of the arithmetic)
-            while(ods.getLightDetected() < BEACON_DISTANCE && opModeIsActive()) {
-                double speed = (robot.AUTONOMOUS_DRIVE_SPEED + 0.1) -  robot.AUTONOMOUS_DRIVE_SPEED * (ods.getLightDetected() / BEACON_DISTANCE);
-                robot.ldrive(speed + speed * ((MIDDLE_REFLECTIVITY - ods2.getLightDetected()) / (LINE_REFLECTIVITY - MIDDLE_REFLECTIVITY)));
-                robot.rdrive(speed - speed * ((MIDDLE_REFLECTIVITY - ods2.getLightDetected()) / (LINE_REFLECTIVITY - MIDDLE_REFLECTIVITY)));
-            }
-        //Brakes
-        robot.ldrive(0);
-        robot.rdrive(0);*/
-
-
-        //Optional thing to replace line following(light sensor would be exactly in the middle of the robot for this)
-        //Turns 90 from the starting angle to face the beacon
-        robot.updateGyro();
-        if(colorisblue)
-            gyroTurn(robot.startingAngle - robot.heading - 85);
-        else
-            gyroTurn(robot.startingAngle - robot.heading + 85);
-
-        //Drives until close enough, and gets slower as it goes(replace with line following, go straight for testing
-        while(robot.ods.getLightDetected() < robot.BEACON_DISTANCE && opModeIsActive()) {
-            double speed = (robot.AUTONOMOUS_DRIVE_SPEED * .3 + 0.07) -  robot.AUTONOMOUS_DRIVE_SPEED * .3 * (robot.ods.getLightDetected() / robot.BEACON_DISTANCE);
-            robot.ldrive(speed);
-            robot.rdrive(speed);
-        }
-
-        robot.ldrive(0);
-        robot.rdrive(0);
-
-        robot.timer.reset();
-        while(robot.timer.seconds() < 0.5 && opModeIsActive()) {}
-
-        //Turns depending on robot.color
-        if((colorisblue && robot.color.blue() > robot.color.red()) || (!colorisblue && robot.color.blue() < robot.color.red())) {
-            robot.rdrive(1.5 * robot.AUTONOMOUS_DRIVE_SPEED);
-            robot.ldrive(-0.75 * robot.AUTONOMOUS_DRIVE_SPEED);
-        }
-        else {
-            robot.ldrive(1.5 * robot.AUTONOMOUS_DRIVE_SPEED);
-            robot.rdrive(-0.75 * robot.AUTONOMOUS_DRIVE_SPEED);
-        }
-
-        robot.timer.reset();
-        while(robot.timer.seconds() < 0.5 && opModeIsActive()) {}
-
-        robot.ldrive(0);
-        robot.rdrive(0);
-
-        robot.timer.reset();
-        while(robot.timer.seconds() < 0.5 && opModeIsActive()) {}
-
-        driveInches(-8, -1);
-
-        /*if(colorisblue)
-            gyroTurn(startingAngle - robot.heading + 85);
-        else
-            gyroTurn(startingAngle - robot.heading - 85);*/
     }
 }
