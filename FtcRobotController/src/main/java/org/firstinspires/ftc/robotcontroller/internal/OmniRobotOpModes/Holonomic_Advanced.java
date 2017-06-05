@@ -2,9 +2,9 @@ package org.firstinspires.ftc.robotcontroller.internal.OmniRobotOpModes;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
-
 
 @TeleOp(name = "Holonomic_Drive_Advanced", group = "omni")
 public class Holonomic_Advanced extends OpMode {
@@ -12,13 +12,15 @@ public class Holonomic_Advanced extends OpMode {
     DcMotor fright;
     DcMotor bleft;
     DcMotor bright;
+    CRServo gear1;
+    CRServo gear2;
 
     float driveCoefficient = .3f;
 
-    int fleftOn = 1;
-    int frightOn = 1;
-    int bleftOn = 1;
-    int brightOn = 1;
+    float fleftOn = 1;
+    float frightOn = 1;
+    float bleftOn = 1;
+    float brightOn = 1;
 
     @Override
     public void init (){
@@ -26,6 +28,7 @@ public class Holonomic_Advanced extends OpMode {
         fright = hardwareMap.dcMotor.get("fright");
         bleft = hardwareMap.dcMotor.get("bleft");
         bright = hardwareMap.dcMotor.get("bright");
+        gear1 = hardwareMap.crservo.get("gear1");
 
         fright.setDirection(DcMotorSimple.Direction.REVERSE);
         bright.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -49,25 +52,39 @@ public class Holonomic_Advanced extends OpMode {
             driveCoefficient = 0.3f;
 
         if(gamepad1.right_trigger > 0.05) {
-            fleft.setPower( fleftOn * ClipValue( driveCoefficient * (gamepad1.right_trigger * -1)));
-            fright.setPower( frightOn * ClipValue( driveCoefficient * (gamepad1.right_trigger)));
-            bleft.setPower( bleftOn * ClipValue( driveCoefficient * (gamepad1.right_trigger * -1)));
-            bright.setPower( brightOn * ClipValue( driveCoefficient * (gamepad1.right_trigger)));
+            fleftOn = ( fleftOn * ClipValue( driveCoefficient * (gamepad1.right_trigger * -1)));
+            frightOn = ( frightOn * ClipValue( driveCoefficient * (gamepad1.right_trigger)));
+            bleftOn = ( bleftOn * ClipValue( driveCoefficient * (gamepad1.right_trigger * -1)));
+            brightOn = ( brightOn * ClipValue( driveCoefficient * (gamepad1.right_trigger)));
         }
 
         else if(gamepad1.left_trigger > 0.05) {
-            fleft.setPower( fleftOn * ClipValue( driveCoefficient * (gamepad1.left_trigger)));
-            fright.setPower( frightOn * ClipValue( driveCoefficient * (gamepad1.left_trigger * -1)));
-            bleft.setPower( bleftOn * ClipValue( driveCoefficient * (gamepad1.left_trigger)));
-            bright.setPower( brightOn * ClipValue( driveCoefficient * (gamepad1.left_trigger * -1)));
+            fleftOn = ( fleftOn * ClipValue( driveCoefficient * (gamepad1.left_trigger)));
+            frightOn = ( frightOn * ClipValue( driveCoefficient * (gamepad1.left_trigger * -1)));
+            bleftOn = ( bleftOn * ClipValue( driveCoefficient * (gamepad1.left_trigger)));
+            brightOn = ( brightOn * ClipValue( driveCoefficient * (gamepad1.left_trigger * -1)));
+        }
+        else {
+            fleftOn = 0;
+            frightOn = 0;
+            bleftOn = 0;
+            brightOn = 0;
         }
 
-        else {
-            fleft.setPower( ClipValue( driveCoefficient * (-gamepad1.right_stick_y - gamepad1.right_stick_x)));
-            fright.setPower( ClipValue( driveCoefficient * (-gamepad1.right_stick_y - gamepad1.right_stick_x * -1)));
-            bleft.setPower( ClipValue( driveCoefficient * (-gamepad1.right_stick_y - gamepad1.right_stick_x * -1)));
-            bright.setPower( ClipValue( driveCoefficient * (-gamepad1.right_stick_y - gamepad1.right_stick_x)));
+        fleft.setPower( ClipValue( fleftOn + driveCoefficient * (-gamepad1.right_stick_y - gamepad1.right_stick_x)));
+        fright.setPower( ClipValue( frightOn + driveCoefficient * (-gamepad1.right_stick_y - gamepad1.right_stick_x * -1)));
+        bleft.setPower( ClipValue( bleftOn + driveCoefficient * (-gamepad1.right_stick_y - gamepad1.right_stick_x * -1)));
+        bright.setPower( ClipValue( brightOn + driveCoefficient * (-gamepad1.right_stick_y - gamepad1.right_stick_x)));
+
+        if(fleft.getPower() != 0 || fright.getPower() != 0) {
+            gear1.setPower(1);
+            gear2.setPower(1);
         }
+        else {
+            gear1.setPower(0.5);
+            gear2.setPower(0.5);
+        }
+
 
         telemetry.addData("Joystick X Axis:", gamepad1.right_stick_x);
         telemetry.addData("Joystick Y Axis:", gamepad1.right_stick_y);
