@@ -6,12 +6,14 @@ import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
-@TeleOp(name = "Holonomic Advanced", group = "omni")
-public class Holonomic_Advanced extends OpMode {
+@TeleOp(name = "Holonomic Advanced w/ Gears", group = "omni")
+public class Holonomic_Advanced_Gears extends OpMode {
     DcMotor fleft;
     DcMotor fright;
     DcMotor bleft;
     DcMotor bright;
+    CRServo gear1;
+    CRServo gear2;
 
     float driveCoefficient = .3f;
 
@@ -26,6 +28,9 @@ public class Holonomic_Advanced extends OpMode {
         fright = hardwareMap.dcMotor.get("fright");
         bleft = hardwareMap.dcMotor.get("bleft");
         bright = hardwareMap.dcMotor.get("bright");
+
+        gear1 = hardwareMap.crservo.get("gear1");
+        gear2 = hardwareMap.crservo.get("gear2");
 
         fleft.setDirection(DcMotorSimple.Direction.REVERSE);
         bleft.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -65,6 +70,21 @@ public class Holonomic_Advanced extends OpMode {
             frightOn = 0;
             bleftOn = 0;
             brightOn = 0;
+        }
+
+        if(fleft.getPower() != 0 || fright.getPower() != 0) {
+            if(fright.getPower() + fleft.getPower() > 0) {
+                gear1.setPower(1);
+                gear2.setPower(1);
+            }
+            else {
+                gear1.setPower(-1);
+                gear2.setPower(-1);
+            }
+        }
+        else {
+            gear1.setPower(0);
+            gear2.setPower(0);
         }
 
         fleft.setPower( ClipValue( fleftOn + driveCoefficient * (-gamepad1.right_stick_y + gamepad1.right_stick_x)));

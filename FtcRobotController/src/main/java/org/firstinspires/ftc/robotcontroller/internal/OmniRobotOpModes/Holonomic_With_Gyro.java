@@ -37,8 +37,8 @@ public class Holonomic_With_Gyro extends OpMode {
         bright = hardwareMap.dcMotor.get("bright");
         gyro = hardwareMap.get(BNO055IMU.class, "imu");
 
-        fright.setDirection(DcMotorSimple.Direction.REVERSE);
-        bright.setDirection(DcMotorSimple.Direction.REVERSE);
+        fleft.setDirection(DcMotorSimple.Direction.REVERSE);
+        bleft.setDirection(DcMotorSimple.Direction.REVERSE);
 
         //Setting up data for gyro sensors
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
@@ -90,7 +90,7 @@ public class Holonomic_With_Gyro extends OpMode {
 
         //Translating the joystick values into a polar vector
         double joystickDegrees = Math.toDegrees(Math.atan(gamepad1.right_stick_y / gamepad1.right_stick_x));
-        if(gamepad1.right_stick_y < 0)
+        if(gamepad1.right_stick_y > 0)
             joystickDegrees = joystickDegrees + 180;
         double joystickDistance = Math.sqrt(gamepad1.right_stick_x * gamepad1.right_stick_x + gamepad1.right_stick_y * gamepad1.right_stick_y);
 
