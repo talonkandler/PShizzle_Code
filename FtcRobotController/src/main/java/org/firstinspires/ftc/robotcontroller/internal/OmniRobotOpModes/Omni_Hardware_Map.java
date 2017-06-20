@@ -59,8 +59,11 @@ public class Omni_Hardware_Map {
     }
 
     public void updateGyro() {
-        //May not have to make negative?
+        //May not have to make negative? Make it so that turning is CCW
         heading = - gyro.getAngularOrientation().toAxesReference(AxesReference.INTRINSIC).toAxesOrder(AxesOrder.ZYX).firstAngle;
+        //Changes the range to -180 to 180 instead of 0 to 360
+        if(heading > 180)
+            heading = heading - 360;
     }
 
     float ClipValue(float value) {
