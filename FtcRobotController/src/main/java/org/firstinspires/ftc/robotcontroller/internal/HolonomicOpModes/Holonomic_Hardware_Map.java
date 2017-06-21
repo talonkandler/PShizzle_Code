@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.robotcontroller.internal.OmniRobotOpModes;
+package org.firstinspires.ftc.robotcontroller.internal.HolonomicOpModes;
 
 import com.qualcomm.hardware.adafruit.BNO055IMU;
 import com.qualcomm.hardware.adafruit.JustLoggingAccelerationIntegrator;
@@ -9,7 +9,15 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 
-public class Omni_Hardware_Map {
+/*
+- Name: Holonomic Hardware Map
+- Creator[s]: Talon
+- Date Created: 6/16/17
+- Objective: To create a class that sets up the hardware map for our holonomic robot and has basic
+             functions to reduce redundancies in other programs.
+ */
+
+public class Holonomic_Hardware_Map {
 
     //Declaring variables
     public DcMotor fleft, fright, bleft, bright;
@@ -20,7 +28,7 @@ public class Omni_Hardware_Map {
     private Telemetry telemetry;
 
     //Constructor; Put program's hardwaremap first, then telemetry,  then put true if gyro will be used or false if it won't
-    public Omni_Hardware_Map(HardwareMap hwmap, Telemetry telem, boolean usesGyro){
+    public Holonomic_Hardware_Map(HardwareMap hwmap, Telemetry telem, boolean usesGyro){
         hwMap = hwmap;
         telemetry = telem;
 

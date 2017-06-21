@@ -1,19 +1,45 @@
-package org.firstinspires.ftc.robotcontroller.internal.OmniRobotOpModes;
+package org.firstinspires.ftc.robotcontroller.internal.HolonomicOpModes;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-@TeleOp(name = "Omni Field-Centric Drive", group = "omni")
-public class Omni_Field_Centric extends OpMode {
+/*
+- Name: Holonomic Field-Centric Tele-Op
+- Creator[s]: Talon
+- Date Created: 6/16/17
+- Objective: To drive our holonomic robot around in a field centric manner, which is easier for drivers
+           since they don't have to keep track of the front of the robot.
+- Controls: The right joystick controls translational movement, while the triggers control rotation.
+          Additionally, the A button makes the robot rotate to face the current direction of travel,
+          the start button sets the forward direction of the robot to its current heading,
+          and holding both bumpers sends the robot into ultra-turbo mode, which enhances its speed.
+- Sensor Usage: Our Adafruit IMU gyro sensor is used in this program for detecting the robot's heading,
+                which is used to determine what direction the robot needs to go with respect to its front.
+- Key Algorithms: Lines 58-93 contains the algorithm that converts joystick input into actual motor
+                  values. First the rectangular vector obtained from the joystick values is converted
+                  into a polar vector. Then the robot heading is subtracted to find the angle that the
+                  robot must travel with respect to its front. This angle is run through some trigonometry
+                  to find ratios for the motor values, which are then adjusted to match the desired motor power.
+- Uniqueness: Although this is a fairly standard field centric drive, the added customizations to give
+              the driver more options(A/start/bumpers) is what makes this program stand out.
+- Possible Improvements: The main algorithm is a bit lengthy possibly causing some lag, so if needed
+                         the joystick polar vector could be converted back to rectangular and plugged
+                         into the motors like in the robot centric program instead of using all of the
+                         trigonometry. Also pivoting could be added in if found to be useful, but
+                         I have not yet thought of a practical use for it.
+ */
 
-    Omni_Hardware_Map robot;
+@TeleOp(name = "Holonomic Field-Centric Tele-Op", group = "holonomic")
+public class Holonomic_Field_Centric_Tele_Op extends OpMode {
+
+    Holonomic_Hardware_Map robot;
     float fieldCentricAngle = 0; //Controls the field centric angle, for lack of a better term
     float desiredAngle = 0; //Angle the robot should be at
     boolean isTurning = false; //Whether the robot is being turned with the triggers
 
     @Override
     public void init (){
-        robot = new Omni_Hardware_Map(hardwareMap, telemetry, true);
+        robot = new Holonomic_Hardware_Map(hardwareMap, telemetry, true);
     }
 
     @Override
