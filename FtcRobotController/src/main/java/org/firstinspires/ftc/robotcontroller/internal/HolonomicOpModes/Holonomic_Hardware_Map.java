@@ -56,7 +56,7 @@ public class Holonomic_Hardware_Map {
 
         //Alerts user that initialization is done
         telemetry.addData("Ready to go", true);
-        telemetry.update();
+        //telemetry.update(); //This line is giving us issues, so we may just have to cut the telemetry during init
     }
 
     public void drive(float fl, float fr, float bl, float br) {
